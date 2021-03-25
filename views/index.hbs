@@ -1,19 +1,26 @@
 <h1>Hello, {{username}}</h1>
 <h2>Your TODO list</h2>
-<form>
-    <ul> {{! Unordered list }}
-        <li>Some item <input type="submit" value="Delete"</li> {{! List item }}
-        <li>Some item <input type="submit" value="Delete"</li>
-        <li>Some item <input type="submit" value="Delete"</li>
 
+<form method="post">
+    <ul> {{! Unordered list }}
+        {{#each items}}
+        <li> {{! List item }}
+            {{this}} 
+            <button type="submit" name="delete" value="{{this}}">
+                Delete
+            </button>
+            </li> 
+        {{/each}}
     </ul>
 </form>
 
-<form>
-    <input placeholder="Add item">
+<form method="post">
+    <input name="text" placeholder="Add item">
     <input type="submit" value="Add">
 </form>
+
 <br>
-<form>
+
+<form method="post" action="logout">
     <input type="submit" value="Logout">
 </form>

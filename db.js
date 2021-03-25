@@ -1,11 +1,11 @@
 console.log("hello there");
 var { MongoClient } = require("mongodb");
 var bcrypt = require("bcrypt"); //for password auth
+var url = "mongodb+srv://dbUser:dbPassword@cluster0.rdapr.mongodb.net/cps888?retryWrites=true&w=majority";
 
 var db = null;
 async function connect() {
     if (db == null) {
-        var url = "mongodb+srv://dbUser:dbPassword@cluster0.rdapr.mongodb.net/cps888?retryWrites=true&w=majority";
         var options = {useUnifiedTopology: true};
 
         var connection = await MongoClient.connect(url, options);
@@ -66,6 +66,8 @@ async function getListItems(username) {
     var user = await conn.collection('users').findOne({ username });
 
     console.log("List items:", user.list);
+
+    return user.list;
 }
 
 async function deleteListItems(username, item) {
@@ -85,3 +87,12 @@ async function deleteListItems(username, item) {
 // addListItem("yas", "test Item")
 // deleteListItems("yas", "test Item");
 // getListItems("yas");
+
+module.exports = {
+    url,
+    login,
+    register,
+    addListItem,
+    deleteListItems,
+    getListItems,
+};
