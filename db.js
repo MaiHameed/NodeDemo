@@ -80,8 +80,8 @@ async function deleteListItems(username, item) {
     )
 }
 
-// register('marko', 'pass');
-// login('marko', 'pass')
-addListItem("marko", "test Item")
-// deleteListItems("marko", "dummy item");
-// getListItems("marko");
+// register('yas', 'pass');
+// login('yas', 'pass')
+// addListItem("yas", "test Item")
+// deleteListItems("yas", "test Item");
+// getListItems("yas");
