@@ -1,0 +1,17 @@
+<h1>Hello, {{username}}</h1>
+<form method="post">
+    <input name="goToAccount" value="Go To Account" type="submit">
+    <input name="deleteProfile" value="Delete Profile" type="submit">
+    <input name="logout" value="Logout" type="submit">
+    <br>
+    <h2>Total Funds: ${{funds}}</h2>
+    <br>
+    <h2>Transaction List</h2>
+    <ul> {{! Unordered list }}
+        {{#each items}}
+        <li> {{! List item }}
+            <div class="item-text"> {{this}} </div>
+        </li> 
+        {{/each}}
+    </ul>
+</form>

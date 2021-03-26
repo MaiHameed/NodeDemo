@@ -1,3 +1,4 @@
+const connectMongo = require('connect-mongo');
 var express = require('express');
 const { response } = require('../app');
 var router = express.Router();
@@ -10,8 +11,10 @@ router.get('/login', async function(req, res) { // renders a given hbs for given
 
 
 router.post('/login', async function(req, res) {
-
-  var { username, password, role, register } = req.body; // these values coming from login.hbs file
+  var { username, 
+        password, 
+        role, 
+        register } = req.body; // these values coming from login.hbs file
 
   if (register) {
     console.log('Registering ', username, ' as ', role);
@@ -36,26 +39,32 @@ router.use(ensureLoggedIn);
 
 router.get('/', async function(req, res){
   var { username } = req.session;
-  res.render('index', { 
+  res.render('userHome', { 
     username,
-    items: await db.getListItems(username), 
+    funds: await db.getFunds(username)
+    //items: await db.getListItems(username), 
   }); //replaces username in index file
 });
 
 router.post('/', async function(req, res) {
-  var { username } = req.session;
+  var { goToAccount, 
+    deleteProfile, 
+    logout } = req.body; // from userHome.hbs
 
-  if (req.body.delete) { // check condition based on the existance of the delete  variable
-    await db.deleteListItems(username, req.body.delete);
+  if (goToAccount) {
+    //res.redirect('/account');
+  } else if (deleteProfile) {
+    //res.redirect('/deleteUser');
+  } else if (logout) {
+    res.redirect('/logout');
   } else {
-    await db.addListItem(username, req.body.text);
+    res.redirect('/');
   }
-
-  res.redirect('/')
 });
 
-router.post('/logout', async function(req, res) {
+router.get('/logout', async function(req, res) {
   req.session.username = '';
   res.redirect('/')
 });
+
 module.exports = router;

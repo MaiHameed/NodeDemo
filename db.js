@@ -27,7 +27,14 @@ async function register(username, password, role) {
     var SALT_ROUNDS = 10; // recomended value for hashing
     var passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
-    await conn.collection('users').insertOne({ username, passwordHash, role })
+    await conn.collection('users').insertOne(
+            { 
+                username, 
+                passwordHash, 
+                role,
+                funds: 0 
+            }
+        )
 }
 
 async function login(username, password) {
@@ -46,7 +53,15 @@ async function login(username, password) {
 
     console.log("Login Successful!")
 }
+console.log(getFunds("mai5"))
+async function getFunds(username){
+    var conn = await connect();
+    const doc = await conn.collection('users')
+                            .findOne({ username: username })
+    return doc.funds;
+}
 
+/*
 async function addListItem(username, item) {
     var conn = await connect();
 
@@ -80,18 +95,11 @@ async function deleteListItems(username, item) {
        } 
     )
 }
-
-// register('yas', 'pass');
-// login('yas', 'pass')
-// addListItem("yas", "test Item")
-// deleteListItems("yas", "test Item");
-// getListItems("yas");
+*/
 
 module.exports = {
     url,
     login,
     register,
-    addListItem,
-    deleteListItems,
-    getListItems,
+    getFunds
 };
