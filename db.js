@@ -1,4 +1,3 @@
-console.log("hello there");
 var { MongoClient } = require("mongodb");
 var bcrypt = require("bcrypt"); //for password auth
 var url = "mongodb+srv://dbUser:dbPassword@cluster0.rdapr.mongodb.net/cps888?retryWrites=true&w=majority";
@@ -17,18 +16,18 @@ async function connect() {
     return db;
 }
 
-async function register(username, password) {
+async function register(username, password, role) {
     var conn = await connect(); // establish connection with database
-    var exsitingUser = await conn.collection('users').findOne({ username }); // pull from collection
+    var exsistingUser = await conn.collection('users').findOne({ username }); // pull from collection
 
-    if (exsitingUser != null) {
+    if (exsistingUser != null) {
         throw new Error('User Exists!')
     }
 
     var SALT_ROUNDS = 10; // recomended value for hashing
     var passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
-    await conn.collection('users').insertOne({ username, passwordHash })
+    await conn.collection('users').insertOne({ username, passwordHash, role })
 }
 
 async function login(username, password) {

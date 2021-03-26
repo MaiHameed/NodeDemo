@@ -3,17 +3,19 @@ const { response } = require('../app');
 var router = express.Router();
 var db = require("../db")
 
+// User login page
 router.get('/login', async function(req, res) { // renders a given hbs for given endpoint
-  res.render('login', { tittle: 'Login'})
+  res.render('login', { title: 'Login'})
 });
+
 
 router.post('/login', async function(req, res) {
 
-  var { username, password, register } = req.body; // these values coming from login.hbs file
-  console.log('logging in...', username);
+  var { username, password, role, register } = req.body; // these values coming from login.hbs file
 
   if (register) {
-    await db.register(username, password) // these are functions in db
+    console.log('Registering ', username, ' as ', role);
+    await db.register(username, password, role) // these are functions in db
   } else {
     await db.login(username, password)
   }
