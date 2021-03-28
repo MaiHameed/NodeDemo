@@ -67,9 +67,13 @@ router.get('/logout', async function(req, res) {
   res.status(200).end();
 });
 
-router.delete('/deleteProfile', async function(req, res) {
-  await db.deleteProfile(username)
-  res.redirect('/');
+router.delete('/deleteProfile/:username', async function(req, res) {
+  const response = await db.deleteProfile(req.params.username);
+  if(!response){
+    res.status(200).end();
+  }else{
+    res.status(500).end();
+  }
 });
 
 module.exports = router;

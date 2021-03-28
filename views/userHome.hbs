@@ -13,9 +13,15 @@
     <h2>Total Funds: ${{funds}}</h2>
 </body>
 <script>
-    function deleteProfile() {
+    async function deleteProfile() {
         if (confirm('Are you sure?')) {
-            fetch('/deleteProfile', { method: 'DELETE' });
+            var res = await fetch('/deleteProfile/'+'{{username}}', { method: 'DELETE' });
+            if(res.status == 200){
+                res = await fetch('/logout', { method: 'GET' });
+                if(res.status == 200){
+                    location.reload();
+                }
+            }
         }
     }
     function goToAccount() {

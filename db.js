@@ -50,7 +50,6 @@ async function login(username, password) {
     if (!valid) { 
         throw new Error("Invalid Password");
     }
-
     console.log("Login Successful!")
 }
 
@@ -61,9 +60,16 @@ async function getFunds(username){
     return doc.funds;
 }
 
+async function deleteProfile(username){
+    var conn = await connect();
+    await conn.collection('users').deleteOne({ username: username });
+    return 0
+}
+
 module.exports = {
     url,
     login,
     register,
-    getFunds
+    getFunds,
+    deleteProfile
 };
