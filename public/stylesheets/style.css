@@ -21,12 +21,17 @@ input {
 
 }
 
-input[type = 'submit'] { /*type from html*/
+input[type = 'submit'], button { /*type from html*/
   background-color: black;
+  border: none;
   color: white;
+  padding: 15px 32px;
   width: 148px;
-  cursor: pointer;
-  margin-top: 20px;
+  transition-duration: 0.4s;
+}
+
+input[type = 'submit']:hover, button:hover { /*type from html*/
+  background-color: darkgray;
 }
 
 ul {

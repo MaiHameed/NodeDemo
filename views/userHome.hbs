@@ -1,23 +1,31 @@
-<h1>Hello, {{username}}</h1>
-<form method="post">
-    <input name="goToAccount" value="Go To Account" type="submit">
-    <input name="deleteProfile" value="Delete Profile" type="submit">
-    <input name="logout" value="Logout" type="submit">
-    <br>
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+    <h1>Hello, {{username}}</h1>
+    <div>
+        <button onclick="goToAccount()">Account</button>
+        <button onclick="deleteProfile()">Delete Profile</button>
+        <button onclick="logout()">Logout</button>
+    </div>
     <h2>Total Funds: ${{funds}}</h2>
-    <br>
-    <h2>Transaction List</h2>
-    <ul> {{! Unordered list }}
-        {{#each items}}
-        <li> {{! List item }}
-            <div class="item-text"> {{this}} </div>
-        </li> 
-        {{/each}}
-    </ul>
-</form>
-
+</body>
 <script>
-	function delete() {
-		fetch('/deleteProfile', { method: 'DELETE' });
-	}
+    function deleteProfile() {
+        if (confirm('Are you sure?')) {
+            fetch('/deleteProfile', { method: 'DELETE' });
+        }
+    }
+    function goToAccount() {
+        fetch('/account', { method: 'GET' });
+    }
+    async function logout(){
+        const res = await fetch('/logout', { method: 'GET' });
+        if(res.status == 200){
+            location.reload();
+        }
+    }
 </script>
+</html>

@@ -64,7 +64,7 @@ router.post('/', async function(req, res) {
 
 router.get('/logout', async function(req, res) {
   req.session.username = '';
-  res.redirect('/')
+  res.status(200).end();
 });
 
 router.delete('/deleteProfile', async function(req, res) {
