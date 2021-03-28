@@ -61,42 +61,6 @@ async function getFunds(username){
     return doc.funds;
 }
 
-/*
-async function addListItem(username, item) {
-    var conn = await connect();
-
-    await conn.collection('users').updateOne(
-        { username },
-        {
-            $push: {
-                list: item,
-            }
-        }
-    )
-}
-
-async function getListItems(username) {
-    var conn = await connect();
-    var user = await conn.collection('users').findOne({ username });
-
-    console.log("List items:", user.list);
-
-    return user.list;
-}
-
-async function deleteListItems(username, item) {
-    var conn = await connect();
-    await conn.collection('users').updateOne(
-       { username },
-       {
-           $pull: {
-               list: item,
-           }
-       } 
-    )
-}
-*/
-
 module.exports = {
     url,
     login,
