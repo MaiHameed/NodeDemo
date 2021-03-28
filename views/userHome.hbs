@@ -15,3 +15,9 @@
         {{/each}}
     </ul>
 </form>
+
+<script>
+	function delete() {
+		fetch('/deleteProfile', { method: 'DELETE' });
+	}
+</script>

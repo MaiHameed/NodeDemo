@@ -53,7 +53,7 @@ async function login(username, password) {
 
     console.log("Login Successful!")
 }
-console.log(getFunds("mai5"))
+
 async function getFunds(username){
     var conn = await connect();
     const doc = await conn.collection('users')

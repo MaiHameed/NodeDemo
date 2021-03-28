@@ -54,7 +54,7 @@ router.post('/', async function(req, res) {
   if (goToAccount) {
     //res.redirect('/account');
   } else if (deleteProfile) {
-    //res.redirect('/deleteUser');
+    res.redirect('/deleteProfile');
   } else if (logout) {
     res.redirect('/logout');
   } else {
@@ -65,6 +65,11 @@ router.post('/', async function(req, res) {
 router.get('/logout', async function(req, res) {
   req.session.username = '';
   res.redirect('/')
+});
+
+router.delete('/deleteProfile', async function(req, res) {
+  await db.deleteProfile(username)
+  res.redirect('/');
 });
 
 module.exports = router;
