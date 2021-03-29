@@ -16,82 +16,103 @@ async function connect() {
     return db;
 }
 
-async function register(username, password, role) {
+async function register(name, username, password, role) {
     var conn = await connect(); // establish connection with database
-    var exsistingUser = await conn.collection('users').findOne({ username }); // pull from collection
-
-    if (exsistingUser != null) {
-        throw new Error('User Exists!')
-    }
-
     var SALT_ROUNDS = 10; // recomended value for hashing
     var passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
-    await conn.collection('users').insertOne({ username, passwordHash, role })
+    const exsistingUser = await conn.collection('users').findOne({ username }); // pull from collection
+    const exsistingAdvisor = await conn.collection('advisors').findOne({ username });
+
+    if(exsistingUser != null || exsistingAdvisor != null){
+        throw new Error("Username already taken!");
+    }
+
+    if(role == 'user'){
+        await conn.collection('users').insertOne(
+            { 
+                name,
+                username, 
+                passwordHash, 
+                financialProfile: {
+                    plans : [],
+                    pendingPlans : [],
+                    totalFunds : 0
+                }
+            }
+        )
+    }else{
+        await conn.collection('advisors').insertOne(
+            { 
+                name,
+                username, 
+                passwordHash,
+                plans: [],
+                advisorType : "Budget Planner" 
+            }
+        )
+    }
 }
 
 async function login(username, password) {
     var conn = await connect();
     var user = await conn.collection('users').findOne({ username });
+    var advisor = await conn.collection('advisors').findOne({ username });
 
-    if (user == null) {
-        throw new Error('User does not exsist')
+    if (user == null && advisor == null) {
+        throw new Error('Profile does not exsist!');
+    }else if(user == null){
+        var valid = await bcrypt.compare(password, advisor.passwordHash);
+        var role = 'advisor';
+    }else{
+        var valid = await bcrypt.compare(password, user.passwordHash);
+        var role = 'user';
     }
-
-    var valid = await bcrypt.compare(password, user.passwordHash);
 
     if (!valid) { 
         throw new Error("Invalid Password");
     }
-
-    console.log("Login Successful!")
+    console.log("Login Successful!");
+    return role;
 }
 
-async function addListItem(username, item) {
+async function getFunds(username){
     var conn = await connect();
-
-    await conn.collection('users').updateOne(
-        { username },
-        {
-            $push: {
-                list: item,
-            }
-        }
-    )
+    const doc = await conn.collection('users')
+                            .findOne({ username: username })
+    return doc.financialProfile.totalFunds;
 }
 
-async function getListItems(username) {
+async function getName(username){
     var conn = await connect();
     var user = await conn.collection('users').findOne({ username });
+    var advisor = await conn.collection('advisors').findOne({ username });
 
-    console.log("List items:", user.list);
-
-    return user.list;
+    if (user == null && advisor == null) {
+        throw new Error('Username: '+username+' does not have a profile!');
+    }else if(user == null){
+        const doc = await conn.collection('advisors')
+                                .findOne({ username });
+        return doc.name;
+    }else{
+        const doc = await conn.collection('users')
+                                .findOne({ username });
+        return doc.name;
+    }
 }
 
-async function deleteListItems(username, item) {
+async function deleteProfile(username){
     var conn = await connect();
-    await conn.collection('users').updateOne(
-       { username },
-       {
-           $pull: {
-               list: item,
-           }
-       } 
-    )
+    await conn.collection('users').deleteOne({ username: username });
+    await conn.collection('advisors').deleteOne({ username: username });
+    return 0
 }
-
-// register('yas', 'pass');
-// login('yas', 'pass')
-// addListItem("yas", "test Item")
-// deleteListItems("yas", "test Item");
-// getListItems("yas");
 
 module.exports = {
     url,
     login,
     register,
-    addListItem,
-    deleteListItems,
-    getListItems,
+    getFunds,
+    deleteProfile,
+    getName
 };
