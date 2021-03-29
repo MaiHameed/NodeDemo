@@ -82,11 +82,46 @@ async function deleteListItems(username, item) {
     )
 }
 
+async function getPlans(username) {
+    var conn = await connect();
+    var ObjectId = require('mongodb').ObjectID;
+    var user = await conn.collection('users').findOne({ username });
+    var planIds = user.financialProfile.plans;
+    
+    var planNames = [];
+    planIds.forEach(async function(id) {
+        var plan = await conn.collection('plans').findOne({"_id":ObjectId(id)});
+        planNames.push( plan.PlanName);
+        console.log(plan.PlanName);
+        console.log("Plan Names: ", planNames)
+    });
+
+    console.log("Plan Names2: ", planNames)
+    console.log("Plan IDs:", planIds);
+    
+    return planNames;
+}
+
+function getPlans2(username) {
+    return ["plan1", "plan2"];
+}
+
+async function getPlanDetails(planID) {
+    var conn = await connect();
+    var ObjectId = require('mongodb').ObjectID;
+    var plan = await conn.collection('plans').findOne({"_id":ObjectId(planID)})
+    console.log(plan)
+
+}
 // register('yas', 'pass');
 // login('yas', 'pass')
 // addListItem("yas", "test Item")
 // deleteListItems("yas", "test Item");
 // getListItems("yas");
+
+var x = getPlans('joe');
+console.log("X: ", x)
+//getPlanDetails('6061ede581737cf549fecb5c');
 
 module.exports = {
     url,
@@ -95,4 +130,7 @@ module.exports = {
     addListItem,
     deleteListItems,
     getListItems,
+    getPlans,
+    getPlans2,
+    getPlanDetails
 };

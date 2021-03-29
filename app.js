@@ -10,7 +10,7 @@ var db = require("./db");
 var session = require("express-session");
 var MongoStore = require('connect-mongo')(session);
 
-var indexRouter = require('./routes/index');
+var indexRouter = require('./routes/routePlans');
 const { Db } = require('mongodb');
 
 var app = express();

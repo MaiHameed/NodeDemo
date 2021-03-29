@@ -1,0 +1,32 @@
+{{!-- <h1>{{title}}</h1>
+<p> hi friends  </p> --}}
+
+<div> {{! left alligns}}
+    <h1>Budgets</h1>
+    <h2>Your Budgets</h2>
+
+    <form method="post">
+        <ul> {{! Unordered list }}
+            {{#each items}}
+            <li> {{! List item }}
+                <div class="item-text"> {{this}} </div>
+                <button type="submit" name="view" value="{{this}}">
+                    View
+                </button>
+                <button type="submit" name="edit" value="{{this}}">
+                    Edit
+                </button>
+                <button type="submit" name="delete" value="{{this}}">
+                    Delete
+                </button>
+                </li> 
+            {{/each}}
+        </ul>
+    </form>
+
+    <br>
+
+    <form method="post" action="logout">
+        <input type="submit" value="Logout">
+    </form>
+</div>

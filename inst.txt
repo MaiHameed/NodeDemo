@@ -1,0 +1,4 @@
+View all plans (Both User and Financial Advisor): - YAS
+delete button, edit plan button (User)
+Send plan button (Advisor)
+View all pending plans (accept button and delete button) (User)

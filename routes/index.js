@@ -4,7 +4,11 @@ var router = express.Router();
 var db = require("../db")
 
 router.get('/login', async function(req, res) { // renders a given hbs for given endpoint
-  res.render('login', { tittle: 'Login'})
+  res.render('login', { title: 'Login'})
+});
+
+router.get('/plans', async function(req, res) { // renders a given hbs for given endpoint
+  res.render('plans', { title: 'Plans'})
 });
 
 router.post('/login', async function(req, res) {
@@ -56,4 +60,14 @@ router.post('/logout', async function(req, res) {
   req.session.username = '';
   res.redirect('/')
 });
+
+router.get('/plans', async function(req, res){
+  var { username } = req.session;
+  res.render('plans', { 
+    username,
+    items: ["1", "2", "3"], 
+  }); //replaces username in index file
+});
+
+
 module.exports = router;
