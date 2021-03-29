@@ -5,33 +5,55 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-
 }
 
-input {
+.textbox {
   border: 0;
   outline: 0;
-
   background-color: rgb(221, 221, 221);
   padding: 10px;
-
   width: 300px;
   box-sizing: border-box; /* aligns elements*/
   margin-top: 5px;
-
 }
 
-input[type = 'submit'], button { /*type from html*/
+
+input[type = 'submit'] { 
   background-color: black;
   border: none;
   color: white;
   padding: 15px 32px;
-  width: 148px;
   transition-duration: 0.4s;
+  width: 300px;
+  margin-top: 15px;
 }
+
+button { 
+  background-color: black;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  transition-duration: 0.4s;
+  width: 300px;
+  margin-bottom: 10px;
+  margin: auto;
+}
+
 
 input[type = 'submit']:hover, button:hover { /*type from html*/
   background-color: darkgray;
+}
+
+.radioInput{
+  margin: 0.4rem;
+}
+
+.loginDiv {
+  min-width: 500px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 ul {
@@ -75,4 +97,8 @@ h1 {
 
 h2 {
   color: #555;
+}
+
+h3 {
+  text-align: center;
 }

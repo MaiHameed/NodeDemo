@@ -1,15 +1,19 @@
-<h1>LOGIN</h1>
-<form method="post">
-    <input name="username" placeholder="Enter username">
-    <br>
-    <input name="password" placeholder="Enter password" type = "password">
-    <br>
-    <label for="role">Choose a role:</label>
-    <select name="role" id="role">
-        <option value="user">User</option>
-        <option value="financialadvisor">Financial Advisor</option>
-    </select>
-    <br>
-    <input name="login" value="Log in" type="submit">
-    <input name="register" value="Register" type="submit">
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+    <h1>LOGIN</h1>
+    <div class="loginDiv">
+        <form method="post">
+            <input class='textbox' name="username" placeholder="Enter username">
+            <br>
+            <input class='textbox' name="password" placeholder="Enter password" type = "password">
+            <br>
+            <input name="login" value="Log in" type="submit">
+            <h3>Need an account?</h3>
+            <input name="register" value="Register" type="submit">
+        </form>
+    </div>
+</body>

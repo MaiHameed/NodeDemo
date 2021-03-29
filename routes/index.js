@@ -6,27 +6,45 @@ var db = require("../db")
 
 // User login page
 router.get('/login', async function(req, res) { // renders a given hbs for given endpoint
-  res.render('login', { title: 'Login'})
+  res.render('login', { title: 'Login'});
 });
 
+router.post('/login', async function(req, res) { // renders a given hbs for given endpoint
+  var {
+    username,
+    password,
+    login,
+    register
+  } = req.body;
 
-router.post('/login', async function(req, res) {
-  var { username, 
-        password, 
-        role, 
-        register } = req.body; // these values coming from login.hbs file
-
-  if (register) {
-    console.log('Registering ', username, ' as ', role);
-    await db.register(username, password, role) // these are functions in db
-  } else {
-    await db.login(username, password)
+  if(register){
+    res.redirect('/register');
+  }else if(login){
+    var role = await db.login(username, password);
+    req.session.username = username;
+    req.session.role = role;
+    res.redirect('/');
   }
-
-  req.session.username = username; //adds username as a cookie
-  res.redirect('/'); //redirect to homepage
 });
 
+router.post('/register', async function(req, res) {
+  var { name,
+        username, 
+        password, 
+        role } = req.body; // these values coming from login.hbs file
+
+  await db.register(name, username, password, role);
+  req.session.username = username;
+  req.session.role = role;
+  console.log(role);
+  res.redirect('/');
+});
+
+router.get('/register', async function(req,res){
+  res.render('register');
+})
+
+// Protects pages, call this on all pages you want to protect (all pages except the login/register pages above)
 function ensureLoggedIn(req, res, next) { // ensure pages cant be accessed until logged in
   if (!req.session.username) { //if no recorded username in session
     res.redirect('/login')
@@ -35,21 +53,33 @@ function ensureLoggedIn(req, res, next) { // ensure pages cant be accessed until
   }
 }
 
-router.use(ensureLoggedIn);
-
-router.get('/', async function(req, res){
-  var { username } = req.session;
-  res.render('userHome', { 
-    username,
-    funds: await db.getFunds(username)
-    //items: await db.getListItems(username), 
-  }); //replaces username in index file
+router.get('/', ensureLoggedIn, async function(req, res){
+  const username = req.session.username;
+  const role = req.session.role;
+  console.log(role);
+  var isUser;
+  if (role == 'user'){
+    isUser = true;
+    res.render('accountOverview', { 
+      fullName: await db.getName(username),
+      username,
+      isUser,
+      funds: await db.getFunds(username)
+    });
+  } else {
+    isUser = false;
+    res.render('accountOverview', { 
+      fullName: await db.getName(username),
+      username,
+      isUser
+    });
+  }
 });
 
-router.post('/', async function(req, res) {
+router.post('/', ensureLoggedIn, async function(req, res) {
   var { goToAccount, 
     deleteProfile, 
-    logout } = req.body; // from userHome.hbs
+    logout } = req.body; // from accountOverview.hbs
 
   if (goToAccount) {
     //res.redirect('/account');
@@ -62,12 +92,13 @@ router.post('/', async function(req, res) {
   }
 });
 
-router.get('/logout', async function(req, res) {
+router.get('/logout', ensureLoggedIn, async function(req, res) {
   req.session.username = '';
+  req.session.role = '';
   res.status(200).end();
 });
 
-router.delete('/deleteProfile/:username', async function(req, res) {
+router.delete('/deleteProfile/:username', ensureLoggedIn, async function(req, res) {
   const response = await db.deleteProfile(req.params.username);
   if(!response){
     res.status(200).end();
