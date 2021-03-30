@@ -1,0 +1,23 @@
+<html>
+<h1>ACCOUNT OPTIONS</h1>
+<body>
+    <input name="addFunds()" value="Add Funds" type="submit">
+    <br>
+    <input name="removeFunds" value ="Remove Funds" type="submit">
+    <br>
+    <input name="viewPlanList" value="View All Plans" type="submit">
+    <br>
+    <input name="createPlan" value="Create New Plan" type="submit">
+    <br>
+    <button onclick="returntoOverview()">Return to Overview</button>
+
+</body>
+<script>
+    async function returntoOverview() {
+        const res = fetch('/', { method: 'GET' });
+        if(res.status == 200){
+            location.reload();
+        }
+    }
+</script>
+</html>
