@@ -1,4 +1,5 @@
 var express = require('express');
+const { Logger } = require('mongodb');
 const { response } = require('../app');
 var router = express.Router();
 var db = require("../db")
@@ -61,12 +62,20 @@ router.get('/', async function(req, res){
 router.post('/', async function(req, res) {
   var { username } = req.session;
   var planName = req.body.view
-  var plans = await db.getPlans('joe')
-  var planID = getId("joe", plans, planName)
 
-  var plan = await db.getPlanDetails(planID)
-  console.log(plan)
-  res.render('budget', {name: plan['PlanName'], start: plan.StartDate, end: plan.EndDate, total: plan.totalSpent, categories: plan.categories})
+  if (req.body.view) { // check condition based on the existance of the delete  variable
+    console.log("VIEW")
+    var plans = await db.getPlans('joe')
+    var planID = getId("joe", plans, planName)
+    var plan = await db.getPlanDetails(planID)
+    console.log(plan)
+    res.render('budget', {name: plan['PlanName'], start: plan.StartDate, end: plan.EndDate, total: plan.totalSpent, categories: plan.categories})
+  } else if (req.body.edit) {
+    // ola
+    console.log("EDIT")
+  } else if (req.body.delete) {
+    console.log("DELETE")
+  }
 });
 
 router.post('/logout', async function(req, res) {
