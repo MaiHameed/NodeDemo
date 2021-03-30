@@ -9,15 +9,6 @@
     <br>
     <input name="createPlan" value="Create New Plan" type="submit">
     <br>
-    <button onclick="returntoOverview()">Return to Overview</button>
-
+    <button onclick="window.location.href='/'">Return to Overview</button>
 </body>
-<script>
-    async function returntoOverview() {
-        const res = fetch('/', { method: 'GET' });
-        if(res.status == 200){
-            location.reload();
-        }
-    }
-</script>
 </html>

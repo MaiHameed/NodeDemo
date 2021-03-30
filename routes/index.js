@@ -91,4 +91,12 @@ router.delete('/deleteProfile/:username', ensureLoggedIn, async function(req, re
   }
 });
 
+router.get('/account', ensureLoggedIn, async function(req, res){
+  res.render('account-options', {title: 'Account Options'});
+});
+
+router.post('/account', ensureLoggedIn, async function(req, res){
+  
+});
+
 module.exports = router;
