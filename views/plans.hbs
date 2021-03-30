@@ -8,18 +8,23 @@
     <form method="post">
         <ul> {{! Unordered list }}
             {{#each items}}
-            <li> {{! List item }}
-                <div class="item-text"> {{this}} </div>
-                <button type="submit" name="view" value="{{this}}">
-                    View
-                </button>
-                <button type="submit" name="edit" value="{{this}}">
-                    Edit
-                </button>
-                <button type="submit" name="delete" value="{{this}}">
-                    Delete
-                </button>
-                
+                <li> {{! List item }}
+                    <div class="item-text"> {{this}} </div>
+                    <button type="submit" name="view" value="{{this}}">
+                        View
+                    </button>
+                    <button type="submit" name="edit" value="{{this}}">
+                        Edit
+                    </button>
+                    <button type="submit" name="delete" value="{{this}}">
+                        Delete
+                    </button>
+                    <h1>{{isUser}}</h1>
+                    {{#if isUser}}
+                        <button type="submit" name="send" value="{{this}}">
+                            Send plan
+                        </button>
+                    {{/if}}
                 </li> 
             {{/each}}
         </ul>

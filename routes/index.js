@@ -1,5 +1,6 @@
 const connectMongo = require('connect-mongo');
 var express = require('express');
+const { Logger } = require('mongodb');
 const { response } = require('../app');
 var router = express.Router();
 var db = require("../db")
@@ -89,6 +90,56 @@ router.delete('/deleteProfile/:username', ensureLoggedIn, async function(req, re
     res.status(200).end();
   }else{
     res.status(500).end();
+  }
+});
+
+router.get('/plans', async function(req, res){
+  var { username } = req.session;
+  const role = req.session.role;
+  console.log("ROLE: ", role)
+  var isUser = false;
+  if (role == 'user'){
+    isUser = true;
+  }
+  var plans = await db.getPlans(username, role)
+  console.log("PLANS: ", plans )
+  var names = db.getNames(plans)
+  res.render('plans', { 
+    username,
+    items: names,//await db.getPlans('joe')//.then(data => {console.log(data); return data}),
+    isUser 
+  }); //replaces username in index file
+});
+
+router.post('/plans', async function(req, res) {
+  var { username } = req.session;
+  console.log("USERNAME :", username)
+
+  if (req.body.view) { // check condition based on the existance of the delete  variable
+    console.log("VIEW")
+    var planName = req.body.view
+    console.log("PLAN NAME: ", planName)
+    var plans = await db.getPlans(username)
+    var planID = db.getId(username, plans, planName)
+    var plan = await db.getPlanDetails(planID)
+    console.log(plan)
+    res.render('budget', {name: plan['PlanName'], start: plan.StartDate, end: plan.EndDate, total: plan.totalSpent, categories: plan.categories})
+  
+  } else if (req.body.edit) {
+    // ola
+    console.log("EDIT")
+    var planName = req.body.edit
+
+  } else if (req.body.delete) {
+    console.log("DELETE")
+    var { username } = req.session;
+    const role = req.session.role;
+    var planName = req.body.delete
+    var plans = await db.getPlans(username)
+    var planID = db.getId(username, plans, planName)
+    console.log("index ID: ", planID)
+    await db.deletePlan(username, planID, role)
+    res.redirect('/plans')
   }
 });
 

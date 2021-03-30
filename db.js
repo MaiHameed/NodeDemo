@@ -108,18 +108,33 @@ async function deleteProfile(username){
     return 0
 }
 
-async function getPlans(username) {
+async function getPlans(username, role) {
     var conn = await connect();
     var ObjectId = require('mongodb').ObjectID;
-    var user = await conn.collection('users').findOne({ username });
-    var planIds = user.financialProfile.plans;
-    
-    var planNames = await Promise.all(planIds.map(async function(id){
-        var plan = await conn.collection('plans').findOne({"_id":ObjectId(id)});
-        //return plan.PlanName
-        return plan
-    }))
-    return planNames;
+
+    if (role == 'user') {
+        
+        var user = await conn.collection('users').findOne({ username });
+        var planIds = user.financialProfile.plans;
+        
+        var planNames = await Promise.all(planIds.map(async function(id){
+            var plan = await conn.collection('plans').findOne({"_id":ObjectId(id)});
+            //return plan.PlanName
+            return plan
+        }))
+        return planNames;
+
+    } else {
+        var user = await conn.collection('advisors').findOne({ username });
+        var planIds = user.plans;
+        
+        var planNames = await Promise.all(planIds.map(async function(id) {
+            var plan = await conn.collection('plans').findOne({"_id":ObjectId(id)});
+            //return plan.PlanName
+            return plan
+        }))
+        return planNames;
+    }
 }
 
 async function getPlanId(username, planName) {
@@ -151,7 +166,9 @@ async function getPlanDetails(planID) {
 
 function getNames(plans){ //list of plan names
     var names = plans.map(function(plan){
-      return plan.PlanName
+        if (plan != null){
+            return plan.PlanName
+        }
     })
     return names;
   }
@@ -166,31 +183,52 @@ function getId(user, plans, planName) { //id of a plan associated with a user
     });
     return id;
 }
-
-async function deletePlan(username, planID) {
+//60639ff045a263d677595d41
+//6063707145a263d677595d40
+async function deletePlan(username, planID, role) {
     var conn = await connect();
     var ObjectId = require('mongodb').ObjectID;
 
-    var user = await conn.collection('users').findOne({ username });
-    var planIds = user.financialProfile.plans;
-    var i = planIds.indexOf(planID)
-    if (i > -1) {
-        planIds.splice(i,1)
-    }
-
-    const filter = { _id: user._id };
-    const updateDocument = {
-        $set: {
-            financialProfile: {
-                plans: planIds, //[ '6061ede581737cf549fecb5c', '6061ee4481737cf549fecb5d' ],
-                pendingPlans: user.financialProfile.pendingPlans,
-                totalFunds: user.financialProfile.totalFunds,
+    if (role == 'user') {
+        var user = await conn.collection('users').findOne({ username });
+        console.log(user)
+        console.log(planID)
+        var planIds = user.financialProfile.plans;
+        var i = planIds.indexOf(planID.toString())
+        if (i > -1) {
+            planIds.splice(i,1)
+        }
+        const filter = { _id: user._id };
+        const updateDocument = {
+            $set: {
+                financialProfile: {
+                    plans: planIds, //[ '6061ede581737cf549fecb5c', '6061ee4481737cf549fecb5d' ],
+                    pendingPlans: user.financialProfile.pendingPlans,
+                    totalFunds: user.financialProfile.totalFunds,
+                },
             },
-        },
-    };
-    const result = await conn.collection('users').updateOne(filter, updateDocument);
+        };
+        const result = await conn.collection('users').updateOne(filter, updateDocument);
+    } else {
+        var user = await conn.collection('advisors').findOne({ username });
+        console.log(user)
+        console.log(planID)
+        var planIds = user.plans;
+        var i = planIds.indexOf(planID.toString())
+        if (i > -1) {
+            planIds.splice(i,1)
+        }
+        const filter = { _id: user._id };
+        const updateDocument = {
+            $set: {
+                plans: planIds, //[ '6061ede581737cf549fecb5c', '6061ee4481737cf549fecb5d' ],
+            },
+        };
+        const result = await conn.collection('advisors').updateOne(filter, updateDocument);
+    }
     
-    var plan = await conn.collection('plans').deleteOne({"_id":ObjectId(planID)});
+    
+    //var plan = await conn.collection('plans').deleteOne({"_id":ObjectId(planID)});
 }
 
 async function sendPlan(username, planID) {
@@ -215,8 +253,10 @@ async function sendPlan(username, planID) {
 
 }
 
+//deletePlan("yas", 6063707145a263d677595d40)
+
 //sendPlan("joe", "123456")
-//deletePlan("joe", "6061ede581737cf549fecb5c")
+//deletePlan("joe", 6061ede581737cf549fecb5c)
 // register('yas', 'pass');
 // login('yas', 'pass')
 // addListItem("yas", "test Item")
