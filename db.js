@@ -108,11 +108,23 @@ async function deleteProfile(username){
     return 0
 }
 
+async function addFunds(username, amount){
+    var conn = await connect();
+
+    var existingFunds = getFunds(username);
+    existingFunds += amount;
+    const doc = await conn.collection('users')
+                            .findOne({ username: username })
+    doc.financialProfile.totalFunds = existingFunds;
+
+}
+
 module.exports = {
     url,
     login,
     register,
     getFunds,
     deleteProfile,
-    getName
+    getName,
+    addFunds,
 };
