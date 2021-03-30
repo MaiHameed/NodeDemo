@@ -82,46 +82,92 @@ async function deleteListItems(username, item) {
     )
 }
 
-async function getPlans(username) {
+
+
+async function getPlans3(username) {
     var conn = await connect();
     var ObjectId = require('mongodb').ObjectID;
     var user = await conn.collection('users').findOne({ username });
     var planIds = user.financialProfile.plans;
     
     var planNames = [];
-    planIds.forEach(async function(id) {
+    
+    await Promise.all(planIds.map(async userId =>{
         var plan = await conn.collection('plans').findOne({"_id":ObjectId(id)});
         planNames.push( plan.PlanName);
         console.log(plan.PlanName);
-        console.log("Plan Names: ", planNames)
-    });
+    }))
 
-    console.log("Plan Names2: ", planNames)
-    console.log("Plan IDs:", planIds);
-    
-    return planNames;
+
+    return await Promise.all(planNames);
 }
 
 function getPlans2(username) {
     return ["plan1", "plan2"];
 }
 
+async function getPlans(username) {
+    var conn = await connect();
+    var ObjectId = require('mongodb').ObjectID;
+    var user = await conn.collection('users').findOne({ username });
+    var planIds = user.financialProfile.plans;
+    
+    var planNames = await Promise.all(planIds.map(async function(id){
+        var plan = await conn.collection('plans').findOne({"_id":ObjectId(id)});
+        //return plan.PlanName
+        return plan
+    }))
+    return planNames;
+}
+
+async function getPlanId(username, planName) {
+    var conn = await connect();
+    var ObjectId = require('mongodb').ObjectID;
+    var user = await conn.collection('users').findOne({ username });
+    var planIds = user.financialProfile.plans;
+    console.log(planIds)
+    var id2 = null
+    var id = await Promise.resolve(planIds.forEach( async function(id) {
+        var plan = await conn.collection('plans').findOne({"_id":ObjectId(id)});
+        if (plan.PlanName == planName) {
+            console.log("ID: ",id)
+            id2 = id
+            return id;
+        }
+    }));
+    console.log(id2);
+    return  id;
+}
 async function getPlanDetails(planID) {
     var conn = await connect();
     var ObjectId = require('mongodb').ObjectID;
     var plan = await conn.collection('plans').findOne({"_id":ObjectId(planID)})
-    console.log(plan)
+    //console.log(plan)
+    return plan
 
 }
+
+const sleep = ms => {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 // register('yas', 'pass');
 // login('yas', 'pass')
 // addListItem("yas", "test Item")
 // deleteListItems("yas", "test Item");
 // getListItems("yas");
 
-var x = getPlans('joe');
-console.log("X: ", x)
+//getPlans('joe').then(data => {console.log(data); return data})
+
+
+// x.then(function(result) {
+//     console.log(result) // "Some User token"
+//  })
+
 //getPlanDetails('6061ede581737cf549fecb5c');
+
+//var t = getPlanId("joe", "plan11").then(data => {console.log("DATA: ", data); return data})
+// console.log("TTTT: ", t)
 
 module.exports = {
     url,
@@ -132,5 +178,6 @@ module.exports = {
     getListItems,
     getPlans,
     getPlans2,
-    getPlanDetails
+    getPlanDetails,
+    getPlanId,
 };

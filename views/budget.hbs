@@ -1,12 +1,29 @@
 {{!-- <h1>{{title}}</h1>
 <p> hi friends  </p> --}}
+<div>
+    <h1>{{ name }}</h1>
+    <br>
+    <h3>Start date: {{ start }}</h3>
+    <h3>End date: {{ end }}</h3>
+    <h3>Total: ${{ total }}</h3>
+    <br>
+    <h2>categories:</h2>
 
-<h1>{{name}}</h1>
-<form method="post">
-    <input name="username" placeholder="Enter ASDASDF">
-    <br>
-    <input name="password" placeholder="Enter password" type = "password">
-    <br>
-    <input name="login" value="Log in" type="submit">
-    <input name="register" value="Register" type="submit">
-</form>
+    {{!-- <ul> {{! Unordered list }}
+        {{#each categories}}
+        <li> {{! List item }}
+            <h4> {{this.name}} </h4>
+            
+        </li> 
+        {{/each}}
+    </ul> --}}
+    
+
+    {{#each categories}}
+        <h4> {{this.name}}: </h4> 
+        <h5>Budgeted: {{this.budgeted}}</h5>
+        <h5>Spent: {{this.spent}}</h5>
+
+    {{/each}}
+
+</div>
