@@ -76,22 +76,6 @@ router.get('/', ensureLoggedIn, async function(req, res){
   }
 });
 
-router.post('/', ensureLoggedIn, async function(req, res) {
-  var { goToAccount, 
-    deleteProfile, 
-    logout } = req.body; // from accountOverview.hbs
-
-  if (goToAccount) {
-    //res.redirect('/account');
-  } else if (deleteProfile) {
-    res.redirect('/deleteProfile');
-  } else if (logout) {
-    res.redirect('/logout');
-  } else {
-    res.redirect('/');
-  }
-});
-
 router.get('/logout', ensureLoggedIn, async function(req, res) {
   req.session.username = '';
   req.session.role = '';
