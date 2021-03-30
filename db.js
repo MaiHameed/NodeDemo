@@ -167,7 +167,30 @@ async function deletePlan(username, planID) {
     var plan = await conn.collection('plans').deleteOne({"_id":ObjectId(planID)});
 }
 
-deletePlan("joe", "6061ede581737cf549fecb5c")
+async function sendPlan(username, planID) {
+    var conn = await connect();
+    var ObjectId = require('mongodb').ObjectID;
+
+    var user = await conn.collection('users').findOne({ username });
+    var planIds = user.financialProfile.plans;
+    planIds.push(planID)
+
+    const filter = { _id: user._id };
+    const updateDocument = {
+        $set: {
+            financialProfile: {
+                plans: planIds, //[ '6061ede581737cf549fecb5c', '6061ee4481737cf549fecb5d' ],
+                pendingPlans: user.financialProfile.pendingPlans,
+                totalFunds: user.financialProfile.totalFunds,
+            },
+        },
+    };
+    const result = await conn.collection('users').updateOne(filter, updateDocument);
+
+}
+
+//sendPlan("joe", "123456")
+//deletePlan("joe", "6061ede581737cf549fecb5c")
 // register('yas', 'pass');
 // login('yas', 'pass')
 // addListItem("yas", "test Item")
@@ -197,4 +220,6 @@ module.exports = {
     getId,
     getNames,
     getPlanDetails,
+    deletePlan,
+    sendPlan,
 };

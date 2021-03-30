@@ -61,10 +61,12 @@ router.get('/', async function(req, res){
 
 router.post('/', async function(req, res) {
   var { username } = req.session;
-  var planName = req.body.view
+  
 
   if (req.body.view) { // check condition based on the existance of the delete  variable
     console.log("VIEW")
+    var planName = req.body.view
+    console.log("PLAN NAME: ", planName)
     var plans = await db.getPlans('joe')
     var planID = db.getId("joe", plans, planName)
     var plan = await db.getPlanDetails(planID)
@@ -73,8 +75,15 @@ router.post('/', async function(req, res) {
   } else if (req.body.edit) {
     // ola
     console.log("EDIT")
+    var planName = req.body.edit
+    console.log("PLAN NAME: ", planName)
   } else if (req.body.delete) {
     console.log("DELETE")
+    var planName = req.body.delete
+    console.log("PLAN NAME: ", planName)
+    var plans = await db.getPlans('joe')
+    var planID = db.getId("joe", plans, planName)
+    //await db.deletePlan("joe", planID)
   }
 });
 
