@@ -76,11 +76,10 @@ router.post('/', async function(req, res) {
     // ola
     console.log("EDIT")
     var planName = req.body.edit
-    console.log("PLAN NAME: ", planName)
+
   } else if (req.body.delete) {
     console.log("DELETE")
     var planName = req.body.delete
-    console.log("PLAN NAME: ", planName)
     var plans = await db.getPlans('joe')
     var planID = db.getId("joe", plans, planName)
     //await db.deletePlan("joe", planID)

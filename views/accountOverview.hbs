@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+    <h1>Hello, {{fullName}}</h1>
+    <div class='loginDiv'>
+        <button onclick="window.location.href='/account'">Account</button>
+        <br>
+        <button onclick="deleteProfile()">Delete Profile</button>
+        <br>
+        <button onclick="logout()">Logout</button>
+    </div>
+    {{#if isUser}}
+        <h2>Total Funds: ${{funds}}</h2>
+    {{/if}}
+</body>
+<script>
+    async function deleteProfile() {
+        if (confirm('Are you sure?')) {
+            var res = await fetch('/deleteProfile/'+'{{username}}', { method: 'DELETE' });
+            if(res.status == 200){
+                res = await fetch('/logout', { method: 'GET' });
+                if(res.status == 200){
+                    location.reload();
+                }
+            }
+        }
+    }
+    async function logout(){
+        const res = await fetch('/logout', { method: 'GET' });
+        if(res.status == 200){
+            location.reload();
+        }
+    }
+</script>
+</html>
