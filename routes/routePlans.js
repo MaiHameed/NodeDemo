@@ -40,7 +40,7 @@ router.use(ensureLoggedIn);
 router.get('/', async function(req, res){
   var { username } = req.session;
   var plans = await db.getPlans('joe')
-  var names = getNames(plans)
+  var names = db.getNames(plans)
   res.render('plans', { 
     username,
     items: names//await db.getPlans('joe')//.then(data => {console.log(data); return data}), 
@@ -66,7 +66,7 @@ router.post('/', async function(req, res) {
   if (req.body.view) { // check condition based on the existance of the delete  variable
     console.log("VIEW")
     var plans = await db.getPlans('joe')
-    var planID = getId("joe", plans, planName)
+    var planID = db.getId("joe", plans, planName)
     var plan = await db.getPlanDetails(planID)
     console.log(plan)
     res.render('budget', {name: plan['PlanName'], start: plan.StartDate, end: plan.EndDate, total: plan.totalSpent, categories: plan.categories})
@@ -82,24 +82,6 @@ router.post('/logout', async function(req, res) {
   req.session.username = '';
   res.redirect('/')
 });
-
-function getNames(plans){ //list of plan names
-  var names = plans.map(function(plan){
-    return plan.PlanName
-  })
-  return names;
-}
-
-function getId(user, plans, planName) { //id of a plan associated with a user
-  var id = null
-  plans.forEach(function(plan) {
-    if (plan.PlanName == planName) {
-        console.log("ID: ", plan._id)
-        id = plan._id;
-    }
-  });
-  return id;
-}
 
 
 module.exports = router;

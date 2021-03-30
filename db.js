@@ -82,30 +82,6 @@ async function deleteListItems(username, item) {
     )
 }
 
-
-
-async function getPlans3(username) {
-    var conn = await connect();
-    var ObjectId = require('mongodb').ObjectID;
-    var user = await conn.collection('users').findOne({ username });
-    var planIds = user.financialProfile.plans;
-    
-    var planNames = [];
-    
-    await Promise.all(planIds.map(async userId =>{
-        var plan = await conn.collection('plans').findOne({"_id":ObjectId(id)});
-        planNames.push( plan.PlanName);
-        console.log(plan.PlanName);
-    }))
-
-
-    return await Promise.all(planNames);
-}
-
-function getPlans2(username) {
-    return ["plan1", "plan2"];
-}
-
 async function getPlans(username) {
     var conn = await connect();
     var ObjectId = require('mongodb').ObjectID;
@@ -147,10 +123,51 @@ async function getPlanDetails(planID) {
 
 }
 
-const sleep = ms => {
-    return new Promise(resolve => setTimeout(resolve, ms))
+function getNames(plans){ //list of plan names
+    var names = plans.map(function(plan){
+      return plan.PlanName
+    })
+    return names;
+  }
+  
+function getId(user, plans, planName) { //id of a plan associated with a user
+    var id = null
+    plans.forEach(function(plan) {
+        if (plan.PlanName == planName) {
+            console.log("ID: ", plan._id)
+            id = plan._id;
+        }
+    });
+    return id;
 }
 
+async function deletePlan(username, planID) {
+    var conn = await connect();
+    var ObjectId = require('mongodb').ObjectID;
+
+    var user = await conn.collection('users').findOne({ username });
+    var planIds = user.financialProfile.plans;
+    var i = planIds.indexOf(planID)
+    if (i > -1) {
+        planIds.splice(i,1)
+    }
+
+    const filter = { _id: user._id };
+    const updateDocument = {
+        $set: {
+            financialProfile: {
+                plans: planIds, //[ '6061ede581737cf549fecb5c', '6061ee4481737cf549fecb5d' ],
+                pendingPlans: user.financialProfile.pendingPlans,
+                totalFunds: user.financialProfile.totalFunds,
+            },
+        },
+    };
+    const result = await conn.collection('users').updateOne(filter, updateDocument);
+    
+    var plan = await conn.collection('plans').deleteOne({"_id":ObjectId(planID)});
+}
+
+deletePlan("joe", "6061ede581737cf549fecb5c")
 // register('yas', 'pass');
 // login('yas', 'pass')
 // addListItem("yas", "test Item")
@@ -177,7 +194,7 @@ module.exports = {
     deleteListItems,
     getListItems,
     getPlans,
-    getPlans2,
+    getId,
+    getNames,
     getPlanDetails,
-    getPlanId,
 };
