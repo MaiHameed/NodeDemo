@@ -142,14 +142,14 @@ router.post('/plans', async function(req, res) {
 
   } else if (req.body.send) {
     console.log("SEND")
-    var planName = "plan1"//req.body.send;
-    var sendTo = req.body.stu;
-    console.log("PLAN NAME:: ", sendTo)
-    var plans = await db.getPlans(username, "advisor")
-    var planID = db.getId(username, plans, planName)
+    // var planName = "plan1"//req.body.send;
+    // var sendTo = req.body.stu;
+    // console.log("PLAN NAME:: ", sendTo)
+    // var plans = await db.getPlans(username, "advisor")
+    // var planID = db.getId(username, plans, planName)
 
-    await db.sendPlan(sendTo, planID)
-    res.redirect('/plans')
+    // await db.sendPlan(sendTo, planID)
+    // res.redirect('/plans')
 
   }
 });
