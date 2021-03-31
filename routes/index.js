@@ -119,7 +119,7 @@ router.post('/plans', async function(req, res) {
     console.log("VIEW")
     var planName = req.body.view
     console.log("PLAN NAME: ", planName)
-    var plans = await db.getPlans(username)
+    var plans = await db.getPlans(username, req.session.role)
     var planID = db.getId(username, plans, planName)
     var plan = await db.getPlanDetails(planID)
     console.log(plan)
@@ -132,14 +132,25 @@ router.post('/plans', async function(req, res) {
 
   } else if (req.body.delete) {
     console.log("DELETE")
-    var { username } = req.session;
     const role = req.session.role;
     var planName = req.body.delete
-    var plans = await db.getPlans(username)
+    var plans = await db.getPlans(username, req.session.role)
     var planID = db.getId(username, plans, planName)
     console.log("index ID: ", planID)
     await db.deletePlan(username, planID, role)
     res.redirect('/plans')
+
+  } else if (req.body.send) {
+    console.log("SEND")
+    var planName = "plan1"//req.body.send;
+    var sendTo = req.body.stu;
+    console.log("PLAN NAME:: ", sendTo)
+    var plans = await db.getPlans(username, "advisor")
+    var planID = db.getId(username, plans, planName)
+
+    await db.sendPlan(sendTo, planID)
+    res.redirect('/plans')
+
   }
 });
 

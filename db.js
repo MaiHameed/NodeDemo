@@ -1,4 +1,4 @@
-var { MongoClient } = require("mongodb");
+var { MongoClient, Logger } = require("mongodb");
 var bcrypt = require("bcrypt"); //for password auth
 var url = "mongodb+srv://dbUser:dbPassword@cluster0.rdapr.mongodb.net/cps888?retryWrites=true&w=majority";
 
@@ -175,6 +175,9 @@ function getNames(plans){ //list of plan names
   
 function getId(user, plans, planName) { //id of a plan associated with a user
     var id = null
+    console.log("USER: ", user)
+    console.log("PLANS: ", plans)
+    console.log("PLAN NAME: ", planName.toString())
     plans.forEach(function(plan) {
         if (plan.PlanName == planName) {
             console.log("ID: ", plan._id)
@@ -191,8 +194,8 @@ async function deletePlan(username, planID, role) {
 
     if (role == 'user') {
         var user = await conn.collection('users').findOne({ username });
-        console.log(user)
-        console.log(planID)
+        console.log("USER: ", user)
+        console.log("PLAN ID", planID)
         var planIds = user.financialProfile.plans;
         var i = planIds.indexOf(planID.toString())
         if (i > -1) {
@@ -211,8 +214,8 @@ async function deletePlan(username, planID, role) {
         const result = await conn.collection('users').updateOne(filter, updateDocument);
     } else {
         var user = await conn.collection('advisors').findOne({ username });
-        console.log(user)
-        console.log(planID)
+        console.log("USER: ", user)
+        console.log("PLAN ID", planID)
         var planIds = user.plans;
         var i = planIds.indexOf(planID.toString())
         if (i > -1) {
@@ -234,7 +237,7 @@ async function deletePlan(username, planID, role) {
 async function sendPlan(username, planID) {
     var conn = await connect();
     var ObjectId = require('mongodb').ObjectID;
-
+    planID = planID.toString();
     var user = await conn.collection('users').findOne({ username });
     var planIds = user.financialProfile.plans;
     planIds.push(planID)
