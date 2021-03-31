@@ -83,6 +83,19 @@ router.get('/logout', ensureLoggedIn, async function(req, res) {
   res.status(200).end();
 });
 
+router.get('/test/:planName/:person', ensureLoggedIn, async function(req, res) {
+  const planName = req.params.planName;
+  const person = req.params.person;
+
+  console.log("SEND");
+  console.log("PLAN NAME: ", planName);
+  console.log("SEND TO: ", person);
+  var plans = await db.getPlans(username, "advisor");
+  var planID = db.getId(username, plans, planName);
+
+  await db.sendPlan(person, planID);
+  res.status(200).end();
+});
 
 router.delete('/deleteProfile/:username', ensureLoggedIn, async function(req, res) {
   const response = await db.deleteProfile(req.params.username);
@@ -152,15 +165,15 @@ router.post('/plans', async function(req, res) {
     res.redirect('/plans')
 
   } else if (req.body.send) {
-    console.log("SEND")
-    var planName = "plan1";//req.body.view;
-    var sendTo = req.body.stu;
-    console.log("PLAN NAME:: ", planName)
-    var plans = await db.getPlans(username, "advisor")
-    var planID = db.getId(username, plans, planName)
+    // console.log("SEND")
+    // var planName = "plan1";//req.body.view;
+    // var sendTo = req.body.stu;
+    // console.log("PLAN NAME:: ", planName)
+    // var plans = await db.getPlans(username, "advisor")
+    // var planID = db.getId(username, plans, planName)
 
-    await db.sendPlan(sendTo, planID)
-    res.redirect('/plans')
+    // await db.sendPlan(sendTo, planID)
+    // res.redirect('/plans')
 
   }
 });

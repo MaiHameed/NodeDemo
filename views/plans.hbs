@@ -36,7 +36,7 @@
                     </button>
 
                     {{#unless ../user}}
-                        <button onclick="sendIt()" type="submit" name="send" value="{{this}}" >
+                        <button onclick="sendIt('{{this}}')" type="submit" name="send" value="{{this}}" >
                             Send plan
                         </button>
                     {{/unless}}
@@ -48,11 +48,13 @@
 
 <script>
    
-    async function sendIt(req, res){
+    async function sendIt(planName){
         var person = prompt("Please enter username", "Username");
-        console.log(person)
-
-        await fetch('/test/'+'{{username}}', { method: 'GET' });
+        console.log(person);
+        const res = await fetch('/test/'+planName+'/'+person, { method: 'GET' });
+        if(res.status == 200){
+            console.log("Successfully sent "+planName+" to "+person)
+        }
     }
 </script>
 </html>
