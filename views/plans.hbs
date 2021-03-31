@@ -15,20 +15,31 @@
             {{#each items}}
                 <li> {{! List item }}
                     <div class="item-text"> {{this}} </div>
+
                     <button type="submit" name="view" value="{{this}}">
                         View
                     </button>
-                    <button type="submit" name="edit" value="{{this}}">
-                        Edit
-                    </button>
+
+                    {{#if ../viewPending}}
+                        <button type="submit" name="accept" value="{{this}}">
+                            Accept
+                        </button>
+                    
+                    {{else}}
+                        <button type="submit" name="edit" value="{{this}}">
+                            Edit
+                        </button>
+                    {{/if}}
+
                     <button type="submit" name="delete" value="{{this}}">
                         Delete
                     </button>
-                    {{#if true}}
+
+                    {{#unless ../user}}
                         <button onclick="sendIt()" type="submit" name="send" value="{{this}}" >
                             Send plan
                         </button>
-                    {{/if}}
+                    {{/unless}}
                 </li> 
             {{/each}}
         </ul>
@@ -36,20 +47,12 @@
 </body>
 
 <script>
-    async function deleteProfile() {
-        if (confirm('Are you sure?')) {
-            var res = await fetch('/deleteProfile/'+'{{username}}', { method: 'DELETE' });
-            if(res.status == 200){
-                res = await fetch('/logout', { method: 'GET' });
-                if(res.status == 200){
-                    location.reload();
-                }
-            }
-        }
-    }
-    async function sendIt(){
-        confirm('Are you sure?')
-        console.log("SEND IT BAYBEE")
+   
+    async function sendIt(req, res){
+        var person = prompt("Please enter username", "Username");
+        //req.params.person = person
+        req.session.person = person;
+        console.log(person)
     }
 </script>
 </html>

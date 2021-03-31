@@ -88,18 +88,20 @@ router.delete('/deleteProfile/:username', ensureLoggedIn, async function(req, re
   const response = await db.deleteProfile(req.params.username);
   if(!response){
     res.status(200).end();
-  }else{
+  } else{
     res.status(500).end();
   }
 });
 
-router.get('/plans', async function(req, res){
+router.get('/plans', async function(req, res) {
   var { username } = req.session;
   const role = req.session.role;
   console.log("ROLE: ", role)
-  var isUser = false;
+  var isUser;
   if (role == 'user'){
     isUser = true;
+  } else {
+    isUser = false;
   }
   var plans = await db.getPlans(username, role)
   console.log("PLANS: ", plans )
@@ -107,13 +109,23 @@ router.get('/plans', async function(req, res){
   res.render('plans', { 
     username,
     items: names,//await db.getPlans('joe')//.then(data => {console.log(data); return data}),
-    isUser 
+    user: isUser, 
+    viewPending: false,
   }); //replaces username in index file
 });
+
 
 router.post('/plans', async function(req, res) {
   var { username } = req.session;
   console.log("USERNAME :", username)
+  const role = req.session.role;
+  console.log("ROLE: ", role)
+  var isUser;
+  if (role == 'user'){
+    isUser = true;
+  } else {
+    isUser = false;
+  }
 
   if (req.body.view) { // check condition based on the existance of the delete  variable
     console.log("VIEW")
@@ -123,7 +135,7 @@ router.post('/plans', async function(req, res) {
     var planID = db.getId(username, plans, planName)
     var plan = await db.getPlanDetails(planID)
     console.log(plan)
-    res.render('budget', {name: plan['PlanName'], start: plan.StartDate, end: plan.EndDate, total: plan.totalSpent, categories: plan.categories})
+    res.render('budget', {name: plan['PlanName'], start: plan.StartDate, end: plan.EndDate, total: plan.totalSpent, categories: plan.categories, isUser: isUser})
   
   } else if (req.body.edit) {
     // ola
@@ -132,7 +144,6 @@ router.post('/plans', async function(req, res) {
 
   } else if (req.body.delete) {
     console.log("DELETE")
-    const role = req.session.role;
     var planName = req.body.delete
     var plans = await db.getPlans(username, req.session.role)
     var planID = db.getId(username, plans, planName)
@@ -142,16 +153,68 @@ router.post('/plans', async function(req, res) {
 
   } else if (req.body.send) {
     console.log("SEND")
-    // var planName = "plan1"//req.body.send;
-    // var sendTo = req.body.stu;
-    // console.log("PLAN NAME:: ", sendTo)
-    // var plans = await db.getPlans(username, "advisor")
-    // var planID = db.getId(username, plans, planName)
+    var planName = "plan1";//req.body.view;
+    var sendTo = req.body.stu;
+    console.log("PLAN NAME:: ", planName)
+    var plans = await db.getPlans(username, "advisor")
+    var planID = db.getId(username, plans, planName)
 
-    // await db.sendPlan(sendTo, planID)
-    // res.redirect('/plans')
+    await db.sendPlan(sendTo, planID)
+    res.redirect('/plans')
+
+  }
+});
+
+router.get('/pendingPlans', async function(req, res) {
+  var { username } = req.session;
+  var plans = await db.getPendingPlans(username)
+  console.log("Pending PLANS: ", plans )
+  var names = db.getNames(plans)
+  res.render('plans', { 
+    username,
+    items: names,//await db.getPlans('joe')//.then(data => {console.log(data); return data}),
+    user: false,
+    viewPending: true,
+  }); //replaces username in index file
+});
+
+router.post('/pendingPlans', async function(req, res) {
+  var { username } = req.session;
+  console.log("USERNAME: ", username)
+
+  if (req.body.view) { // check condition based on the existance of the delete  variable
+    console.log("VIEW")
+    var planName = req.body.view
+    console.log("PLAN NAME: ", planName)
+    var plans = await db.getPendingPlans(username)
+    var planID = db.getId(username, plans, planName)
+    var plan = await db.getPlanDetails(planID)
+    console.log(plan)
+    res.render('budget', {name: plan['PlanName'], start: plan.StartDate, end: plan.EndDate, total: plan.totalSpent, categories: plan.categories, isUser: true})
+  
+  } else if (req.body.delete) {
+    console.log("DELETE")
+    var planName = req.body.delete
+    var plans = await db.getPendingPlans(username)
+    var planID = db.getId(username, plans, planName)
+    console.log("index ID: ", planID)
+
+    await db.deletePendingPlan(username, planID)
+    res.redirect('/pendingPlans')
+
+  } else if (req.body.accept) {
+    console.log("ACCEPT")
+    var planName = req.body.accept;
+    console.log("PLAN NAME:: ", planName)
+    var plans = await db.getPlans(username, 'user')
+    var planID = db.getId(username, plans, planName)
+
+    await db.acceptPlan(username, planID)
+    res.redirect('/plans')
 
   }
 });
 
 module.exports = router;
+
+//6063a45645a263d677595d42, 6064c88b428ee6a84059c1d4, 60639ff045a263d677595d41

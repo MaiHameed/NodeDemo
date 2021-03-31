@@ -27,6 +27,7 @@
     {{/each}}
     
 
+    {{#unless isUser}}
     <form method="post">
         <h3>Send plan to: </h3>
         <input class='textbox' name="stu" placeholder="Enter username">
@@ -34,5 +35,5 @@
             Send
         </button>
     </form>
-
+    {{/unless}}
 </div>
