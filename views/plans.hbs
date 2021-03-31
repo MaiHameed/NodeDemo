@@ -50,9 +50,9 @@
    
     async function sendIt(req, res){
         var person = prompt("Please enter username", "Username");
-        //req.params.person = person
-        req.session.person = person;
         console.log(person)
+
+        await fetch('/test/'+'{{username}}', { method: 'GET' });
     }
 </script>
 </html>
