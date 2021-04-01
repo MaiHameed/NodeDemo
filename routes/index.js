@@ -10,6 +10,10 @@ router.get('/login', async function(req, res) { // renders a given hbs for given
   res.render('login', { title: 'Login'})
 });
 
+router.get('/test/:person', ensureLoggedIn, async function(req, res) {
+  console.log("PERSOn: ", person)
+});
+
 router.post('/login', async function(req, res) { // renders a given hbs for given endpoint
   var {
     username,

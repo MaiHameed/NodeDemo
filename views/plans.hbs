@@ -52,7 +52,7 @@
         var person = prompt("Please enter username", "Username");
         console.log(person)
 
-        await fetch('/test/'+'{{username}}', { method: 'GET' });
+        await fetch('/test/'+person, { method: 'GET' });
     }
 </script>
 </html>
