@@ -62,7 +62,7 @@ ul {
 
 li {
   list-style-type: none;
-  width: 100%;
+  width: 150%;
   display: flex;
   box-shadow: 0 0 10px #eee;
   background-color: white;
@@ -89,6 +89,8 @@ li button { /*element within element*/
 .item-text { /*dot denotes class*/
   width: 100%;
   padding: 10px;
+  font-size:x-large;
+  font-weight: bold;
 }
 
 h1 {

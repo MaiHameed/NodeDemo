@@ -165,18 +165,12 @@ router.post('/plans', async function(req, res) {
     await db.deletePlan(username, planID, role)
     res.redirect('/plans')
 
-  } else if (req.body.send) {
-    // console.log("SEND")
-    // var planName = "plan1";//req.body.view;
-    // var sendTo = req.body.stu;
-    // console.log("PLAN NAME:: ", planName)
-    // var plans = await db.getPlans(username, "advisor")
-    // var planID = db.getId(username, plans, planName)
-
-    // await db.sendPlan(sendTo, planID)
-    // res.redirect('/plans')
-
-  }
+  } else if (req.body.home) {
+    res.redirect('/')
+  } 
+  else if (req.body.back) {
+    res.redirect('/plans')
+  } 
 });
 
 router.get('/pendingPlans', async function(req, res) {
@@ -186,15 +180,23 @@ router.get('/pendingPlans', async function(req, res) {
   var names = db.getNames(plans)
   res.render('plans', { 
     username,
-    items: names,//await db.getPlans('joe')//.then(data => {console.log(data); return data}),
-    user: false,
+    items: names,
+    user: true,
     viewPending: true,
-  }); //replaces username in index file
+  }); 
 });
 
 router.post('/pendingPlans', async function(req, res) {
   var { username } = req.session;
   console.log("USERNAME: ", username)
+  const role = req.session.role;
+  console.log("ROLE: ", role)
+  var isUser;
+  if (role == 'user'){
+    isUser = true;
+  } else {
+    isUser = false;
+  }
 
   if (req.body.view) { // check condition based on the existance of the delete  variable
     console.log("VIEW")
@@ -204,7 +206,7 @@ router.post('/pendingPlans', async function(req, res) {
     var planID = db.getId(username, plans, planName)
     var plan = await db.getPlanDetails(planID)
     console.log(plan)
-    res.render('budget', {name: plan['PlanName'], start: plan.StartDate, end: plan.EndDate, total: plan.totalSpent, categories: plan.categories, isUser: true})
+    res.render('budget', {name: plan['PlanName'], start: plan.StartDate, end: plan.EndDate, total: plan.totalSpent, categories: plan.categories, user: isUser})
   
   } else if (req.body.delete) {
     console.log("DELETE")
@@ -219,14 +221,22 @@ router.post('/pendingPlans', async function(req, res) {
   } else if (req.body.accept) {
     console.log("ACCEPT")
     var planName = req.body.accept;
-    console.log("PLAN NAME:: ", planName)
-    var plans = await db.getPlans(username, 'user')
+    //console.log("PLAN NAME:: ", planName)
+    var plans = await db.getPendingPlans(username, 'user')
+    //console.log("PLANS:: ", plans)
+
     var planID = db.getId(username, plans, planName)
 
     await db.acceptPlan(username, planID)
-    res.redirect('/plans')
+    res.redirect('/pendingPlans')
 
   }
+  else if (req.body.home) {
+    res.redirect('/')
+  } 
+  else if (req.body.back) {
+    res.redirect('/pendingPlans')
+  } 
 });
 
 module.exports = router;

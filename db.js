@@ -152,24 +152,6 @@ async function getPendingPlans(username) {
     return planNames;
 }
 
-async function getPlanId(username, planName) {
-    var conn = await connect();
-    var ObjectId = require('mongodb').ObjectID;
-    var user = await conn.collection('users').findOne({ username });
-    var planIds = user.financialProfile.plans;
-    console.log(planIds)
-    var id2 = null
-    var id = await Promise.resolve(planIds.forEach( async function(id) {
-        var plan = await conn.collection('plans').findOne({"_id":ObjectId(id)});
-        if (plan.PlanName == planName) {
-            console.log("ID: ",id)
-            id2 = id
-            return id;
-        }
-    }));
-    console.log(id2);
-    return  id;
-}
 async function getPlanDetails(planID) {
     var conn = await connect();
     var ObjectId = require('mongodb').ObjectID;
@@ -198,8 +180,7 @@ function getId(user, plans, planName) { //id of a plan associated with a user
     });
     return id;
 }
-//60639ff045a263d677595d41
-//6063707145a263d677595d40
+
 async function deletePlan(username, planID, role) {
     var conn = await connect();
     var ObjectId = require('mongodb').ObjectID;
@@ -217,7 +198,7 @@ async function deletePlan(username, planID, role) {
         const updateDocument = {
             $set: {
                 financialProfile: {
-                    plans: planIds, //[ '6061ede581737cf549fecb5c', '6061ee4481737cf549fecb5d' ],
+                    plans: planIds, 
                     pendingPlans: user.financialProfile.pendingPlans,
                     totalFunds: user.financialProfile.totalFunds,
                 },
@@ -236,13 +217,13 @@ async function deletePlan(username, planID, role) {
         const filter = { _id: user._id };
         const updateDocument = {
             $set: {
-                plans: planIds, //[ '6061ede581737cf549fecb5c', '6061ee4481737cf549fecb5d' ],
+                plans: planIds, 
             },
         };
         const result = await conn.collection('advisors').updateOne(filter, updateDocument);
     }
     
-    
+    // Add this back in its just annoying to manually re-create plans so skipping the actual detele for now
     //var plan = await conn.collection('plans').deleteOne({"_id":ObjectId(planID)});
 }
 
@@ -262,7 +243,7 @@ async function deletePendingPlan(username, planID) {
     const updateDocument = {
         $set: {
             financialProfile: {
-                plans: user.financialProfile.plans, //[ '6061ede581737cf549fecb5c', '6061ee4481737cf549fecb5d' ],
+                plans: user.financialProfile.plans, 
                 pendingPlans: planIds,
                 totalFunds: user.financialProfile.totalFunds,
             },
@@ -270,6 +251,7 @@ async function deletePendingPlan(username, planID) {
     };
     const result = await conn.collection('users').updateOne(filter, updateDocument)
     
+    // Add this back in its just annoying to manually re-create plans so skipping the actual detele for now
     //var plan = await conn.collection('plans').deleteOne({"_id":ObjectId(planID)});
 }
 
@@ -281,9 +263,10 @@ async function acceptPlan(username, planID) {
     console.log("USER: ", user)
     console.log("PLAN ID", planID)
 
-    // Remove from pendind plans
+    // Remove from pending plans
     var planIds = user.financialProfile.pendingPlans;
     var i = planIds.indexOf(planID.toString())
+    console.log("IIIIII:: ", i)
     if (i > -1) {
         planIds.splice(i,1)
     }
@@ -299,16 +282,16 @@ async function acceptPlan(username, planID) {
     };
     var result = await conn.collection('users').updateOne(filter, updateDocument)
 
-    // add to plans
-    var planIds = user.financialProfile.plans;
-    planIds.push(planID)
+    //add to plans
+    planIds = user.financialProfile.plans;
+    planIds.push(planID.toString())
 
     filter = { _id: user._id };
     updateDocument = {
         $set: {
             financialProfile: {
                 plans: planIds, 
-                pendingPlans: user.financialProfile.plans,
+                pendingPlans: user.financialProfile.pendingPlans,
                 totalFunds: user.financialProfile.totalFunds,
             },
         },
@@ -336,7 +319,6 @@ async function sendPlan(username, planID) {
         },
     };
     const result = await conn.collection('users').updateOne(filter, updateDocument);
-
 }
 
 //getPendingPlans("yas").then(data => {console.log(data); return data})

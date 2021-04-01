@@ -1,5 +1,4 @@
-{{!-- <h1>{{title}}</h1>
-<p> hi friends  </p> --}}
+
 <div>
     <h1>{{ name }}</h1>
     <br>
@@ -8,26 +7,26 @@
     <h3>Total: ${{ total }}</h3>
     <br>
     <h2>categories:</h2>
-
-    {{!-- <ul> {{! Unordered list }}
-        {{#each categories}}
-        <li> {{! List item }}
-            <h4> {{this.name}} </h4>
-            
-        </li> 
-        {{/each}}
-    </ul> --}}
     
 
     {{#each categories}}
         <h4> {{this.name}}: </h4> 
-        <h5>Budgeted: {{this.budgeted}}</h5>
-        <h5>Spent: {{this.spent}}</h5>
-
+        <h5>Budgeted: ${{this.budgeted}}</h5>
+        <h5>Spent: ${{this.spent}}</h5>
+        <br>
     {{/each}}
     
 
-    {{#unless isUser}}
+    
+    <form method="post">
+        <button type="submit" name="home" value="{{this}}">
+            Home
+        </button>
+        <button type="submit" name="back" value="{{this}}">
+            Back
+        </button>
+    </form>
+    {{!-- {{#unless isUser}}
     <form method="post">
         <h3>Send plan to: </h3>
         <input class='textbox' name="stu" placeholder="Enter username">
@@ -35,5 +34,5 @@
             Send
         </button>
     </form>
-    {{/unless}}
+    {{/unless}} --}}
 </div>
