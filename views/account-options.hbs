@@ -1,14 +1,128 @@
 <html>
 <h1>ACCOUNT OPTIONS</h1>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+    #fundsoverlay {
+        position: fixed; /* Sit on top of the page content */
+        display: none; /* Hidden by default */
+        width: 100%; /* Full width (cover the whole page) */
+        height: 100%; /* Full height (cover the whole page) */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+        z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+        justify-content: center;
+        align-items: center;
+    }
+
+    #fundsoverlay-remove {
+        position: fixed; /* Sit on top of the page content */
+        display: none; /* Hidden by default */
+        width: 100%; /* Full width (cover the whole page) */
+        height: 100%; /* Full height (cover the whole page) */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+        z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+        justify-content: center;
+        align-items: center;
+    }
+    .overlay-content{
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+        align-items: center;
+        margin: 15% auto; /* 15% from the top and centered */ 
+        padding: 20px;
+        border: 1px solid white;
+        width: 80%; /* Could be more or less, depending on screen size */
+        
+    }
+    h2 {
+        color: black;
+    }
+
+    input {
+        border : 0;
+        outline : 0;
+        
+        background-color: greenyellow;
+        padding : 10px;
+        
+        width : 300px;
+        box-sizing : border-box;
+    }
+
+    input[type="text"]{
+        text-align: center;
+    }
+
+    .close {
+        color: blueviolet;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer; /* Add a pointer on hover */
+    }
+
+</style>
 <body>
-    <input name="addFunds()" value="Add Funds" type="submit">
+    <button onclick="fundsOverlay()"> Add Funds </button>
     <br>
-    <input name="removeFunds" value ="Remove Funds" type="submit">
+    <button onclick="fundsOverlayRemove()"> Remove Funds </button>
     <br>
-    <input name="viewPlanList" value="View All Plans" type="submit">
+    <input name="viewPlanList" value="View Active Plans" type="submit">
+    <br>
+    <input name="viewPendingPlans" value="View Pending Plans" type="submit">
     <br>
     <input name="createPlan" value="Create New Plan" type="submit">
     <br>
     <button onclick="window.location.href='/'">Return to Overview</button>
+
+    <div id='fundsoverlay'>
+        <form method="POST">
+            <div class="overlay-content">
+                <span class="close" onclick="off()">&times;</span>
+                {{#if isUser}}
+                <h2> Total Funds: ${{funds}}</h2>
+                {{/if}}
+                <input name="addDollars" type="amount" placeholder= "Amount to Add">
+                <input name="add" value="Remove Funds" type="submit">
+                <div class="result"></div>
+            </div>
+        </form>
+        
+    </div>
+
+    <div id='fundsoverlay-remove'>
+        <form method="POST">
+            <div class="overlay-content">
+                <span class="close" onclick="off()">&times;</span>
+                {{#if isUser}}
+                <h2> Total Funds: ${{funds}}</h2>
+                {{/if}}
+                <input id='remDllars' name="dollars" type="text" placeholder= "Amount to Remove">
+                <input name="remove" value="Remove Funds" type="submit">
+                
+            </div>
+        </form>
+    </div>
 </body>
+<script>
+    function fundsOverlay(){
+        document.getElementById("fundsoverlay").style.display = "flex";
+    }
+    function fundsOverlayRemove(){
+        document.getElementById("fundsoverlay-remove").style.display = "flex";
+    }
+    function off(){
+        document.getElementById("fundsoverlay").style.display = "none";
+        document.getElementById("fundsoverlay-remove").style.display = "none";
+    }
+</script>
 </html>

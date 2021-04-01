@@ -111,23 +111,20 @@ async function deleteProfile(username){
 async function addFunds(username, amount){
     var conn = await connect();
 
-    var existingFunds = getFunds(username);
-    existingFunds += amount;
-    const doc = await conn.collection('users')
-                            .findOne({ username: username })
-    doc.financialProfile.totalFunds = existingFunds;
-
-}
-
-async function addFunds(username, amount){
-    var conn = await connect();
-
-    var existingFunds = getFunds(username);
-    existingFunds += amount;
-    const doc = await conn.collection('users')
-                            .findOne({ username: username })
-    doc.financialProfile.totalFunds = existingFunds;
-
+    var existingFunds = await getFunds(username);
+    console.log(existingFunds);
+    // console.log("input amount: "+ amount)
+    newAmount = +existingFunds + +amount;
+    // console.log("new funds"+ newAmount);
+    await conn.collection('users').updateOne(
+        {username},
+        {
+            $set:{
+                "financialProfile.totalFunds": newAmount,
+            }
+        }
+    )
+    console.log(await getFunds(username))
 }
 
 module.exports = {

@@ -92,11 +92,38 @@ router.delete('/deleteProfile/:username', ensureLoggedIn, async function(req, re
 });
 
 router.get('/account', ensureLoggedIn, async function(req, res){
-  res.render('account-options', {title: 'Account Options'});
+  // console.log("In account")
+  const username = req.session.username;
+  const role = req.session.role;
+  var isUser;
+  if (role == 'user'){
+    isUser = true;
+    res.render('account-options', {
+      title: 'Account Options',
+      funds : await db.getFunds(username),
+      isUser
+  });
+    
+  }
+  
 });
 
 router.post('/account', ensureLoggedIn, async function(req, res){
+  var{
+    addDollars,
+    remDollars,
+    add,
+    remove,
+  } = req.body;
+  const username = req.session.username;
+  var money = await db.getFunds(username);
   
+  if(add){
+    await db.addFunds(username, addDollars)
+  }
+  // else if (remove){
+
+  // }
 });
 
 module.exports = router;
