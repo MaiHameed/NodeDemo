@@ -6,12 +6,17 @@
 <body>
     <h1>Hello, {{fullName}}</h1>
     <div class='loginDiv'>
+        
+        {{!-- Remove later -> uncomment to test plan pages
         <button onclick="window.location.href='/plans'">Plans</button>
         <br>
         {{#if isUser}}
         <button onclick="window.location.href='/pendingPlans'">Pending Plans</button>
         <br>
-        {{/if}}
+        {{/if}}  --}}
+
+        <button onclick="window.location.href='/account'">Account</button>
+        <br>
         <button onclick="deleteProfile()">Delete Profile</button>
         <br>
         <button onclick="logout()">Logout</button>

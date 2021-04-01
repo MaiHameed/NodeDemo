@@ -1,6 +1,3 @@
-{{!-- <h1>{{title}}</h1>
-<p> hi friends  </p> --}}
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -36,7 +33,7 @@
                     </button>
 
                     {{#unless ../user}}
-                        <button onclick="sendIt('{{this}}')" type="submit" name="send" value="{{this}}" >
+                        <button onclick="sendPlan('{{this}}')" type="submit" name="send" value="{{this}}" >
                             Send plan
                         </button>
                     {{/unless}}
@@ -51,10 +48,10 @@
 
 <script>
    
-    async function sendIt(planName){
+    async function sendPlan(planName){
         var person = prompt("Please enter username", "Username");
         console.log(person);
-        const res = await fetch('/test/'+planName+'/'+person, { method: 'GET' });
+        const res = await fetch('/send/'+planName+'/'+person, { method: 'GET' });
         if(res.status == 200){
             console.log("Successfully sent "+planName+" to "+person)
         }

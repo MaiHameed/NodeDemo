@@ -2,22 +2,19 @@
 <div>
     <h1>{{ name }}</h1>
     <br>
-    <h3>Start date: {{ start }}</h3>
-    <h3>End date: {{ end }}</h3>
+    <h3>Start date:  {{ start }}</h3>
+    <h3>End date:  {{ end }}</h3>
     <h3>Total: ${{ total }}</h3>
     <br>
     <h2>categories:</h2>
     
-
     {{#each categories}}
         <h4> {{this.name}}: </h4> 
         <h5>Budgeted: ${{this.budgeted}}</h5>
         <h5>Spent: ${{this.spent}}</h5>
         <br>
     {{/each}}
-    
-
-    
+        
     <form method="post">
         <button type="submit" name="home" value="{{this}}">
             Home
@@ -26,13 +23,4 @@
             Back
         </button>
     </form>
-    {{!-- {{#unless isUser}}
-    <form method="post">
-        <h3>Send plan to: </h3>
-        <input class='textbox' name="stu" placeholder="Enter username">
-        <button type="submit" name="send" value="{{this}}">
-            Send
-        </button>
-    </form>
-    {{/unless}} --}}
 </div>

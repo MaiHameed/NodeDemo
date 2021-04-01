@@ -108,60 +108,55 @@ async function deleteProfile(username){
     return 0
 }
 
-async function getPlans(username, role) {
+async function getPlans(username, role) { // Returns all plans associated with a user
     var conn = await connect();
     var ObjectId = require('mongodb').ObjectID;
 
     if (role == 'user') {
-        
         var user = await conn.collection('users').findOne({ username });
         var planIds = user.financialProfile.plans;
         
-        var planNames = await Promise.all(planIds.map(async function(id){
+        var plans = await Promise.all(planIds.map(async function(id){
             var plan = await conn.collection('plans').findOne({"_id":ObjectId(id)});
-            //return plan.PlanName
             return plan
         }))
-        return planNames;
+        return plans;
 
     } else {
         var user = await conn.collection('advisors').findOne({ username });
         var planIds = user.plans;
         
-        var planNames = await Promise.all(planIds.map(async function(id) {
+        var plans = await Promise.all(planIds.map(async function(id) {
             var plan = await conn.collection('plans').findOne({"_id":ObjectId(id)});
-            //return plan.PlanName
             return plan
         }))
-        return planNames;
+        return plans;
     }
 }
 
-async function getPendingPlans(username) {
+async function getPendingPlans(username) { // Returns all pending plans of given user
     var conn = await connect();
     var ObjectId = require('mongodb').ObjectID;
 
     var user = await conn.collection('users').findOne({ username });
     var planIds = user.financialProfile.pendingPlans;
 
-    var planNames = await Promise.all(planIds.map(async function(id){
+    var plans = await Promise.all(planIds.map(async function(id){
         var plan = await conn.collection('plans').findOne({"_id":ObjectId(id)});
-        //return plan.PlanName
         return plan
     }))
-    return planNames;
+    return plans;
 }
 
-async function getPlanDetails(planID) {
+async function getPlanDetails(planID) { // Returns plan json associated with given ID
     var conn = await connect();
     var ObjectId = require('mongodb').ObjectID;
     var plan = await conn.collection('plans').findOne({"_id":ObjectId(planID)})
-    //console.log(plan)
     return plan
 
 }
 
-function getNames(plans) { //list of plan names
+function getNames(plans) { // Returns list of plan names given a list of plans
     var names = plans.map(function(plan){
         if (plan != null){
             return plan.PlanName
@@ -170,7 +165,7 @@ function getNames(plans) { //list of plan names
     return names;
   }
   
-function getId(user, plans, planName) { //id of a plan associated with a user
+function getId(user, plans, planName) { // Returns ID of a plan associated with a user given planName
     var id = null
     plans.forEach(function(plan) {
         if (plan.PlanName == planName) {
@@ -181,14 +176,12 @@ function getId(user, plans, planName) { //id of a plan associated with a user
     return id;
 }
 
-async function deletePlan(username, planID, role) {
+async function deletePlan(username, planID, role) { // Removes given plan from user plan list, and deletes plan object
     var conn = await connect();
     var ObjectId = require('mongodb').ObjectID;
 
     if (role == 'user') {
         var user = await conn.collection('users').findOne({ username });
-        console.log("USER: ", user)
-        console.log("PLAN ID", planID)
         var planIds = user.financialProfile.plans;
         var i = planIds.indexOf(planID.toString())
         if (i > -1) {
@@ -205,10 +198,9 @@ async function deletePlan(username, planID, role) {
             },
         };
         const result = await conn.collection('users').updateOne(filter, updateDocument);
+        
     } else {
         var user = await conn.collection('advisors').findOne({ username });
-        console.log("USER: ", user)
-        console.log("PLAN ID", planID)
         var planIds = user.plans;
         var i = planIds.indexOf(planID.toString())
         if (i > -1) {
@@ -227,18 +219,18 @@ async function deletePlan(username, planID, role) {
     //var plan = await conn.collection('plans').deleteOne({"_id":ObjectId(planID)});
 }
 
-async function deletePendingPlan(username, planID) {
+async function deletePendingPlan(username, planID) { // Removes given plan from user pendingPlan list, and deletes plan object
     var conn = await connect();
     var ObjectId = require('mongodb').ObjectID;
 
     var user = await conn.collection('users').findOne({ username });
-    console.log("USER: ", user)
-    console.log("PLAN ID", planID)
+
     var planIds = user.financialProfile.pendingPlans;
     var i = planIds.indexOf(planID.toString())
     if (i > -1) {
         planIds.splice(i,1)
     }
+
     const filter = { _id: user._id };
     const updateDocument = {
         $set: {
@@ -255,18 +247,15 @@ async function deletePendingPlan(username, planID) {
     //var plan = await conn.collection('plans').deleteOne({"_id":ObjectId(planID)});
 }
 
-async function acceptPlan(username, planID) {
+async function acceptPlan(username, planID) { // Removes given plan ID from pending plan list, and adds to plans list for the user
     var conn = await connect();
     var ObjectId = require('mongodb').ObjectID;
 
     var user = await conn.collection('users').findOne({ username });
-    console.log("USER: ", user)
-    console.log("PLAN ID", planID)
 
     // Remove from pending plans
     var planIds = user.financialProfile.pendingPlans;
     var i = planIds.indexOf(planID.toString())
-    console.log("IIIIII:: ", i)
     if (i > -1) {
         planIds.splice(i,1)
     }
@@ -300,7 +289,7 @@ async function acceptPlan(username, planID) {
 
 }
 
-async function sendPlan(username, planID) {
+async function sendPlan(username, planID) { // Adds plan ID to users pending plans list
     var conn = await connect();
     var ObjectId = require('mongodb').ObjectID;
     planID = planID.toString();
@@ -320,29 +309,6 @@ async function sendPlan(username, planID) {
     };
     const result = await conn.collection('users').updateOne(filter, updateDocument);
 }
-
-//getPendingPlans("yas").then(data => {console.log(data); return data})
-//deletePlan("yas", 6063707145a263d677595d40)
-
-//sendPlan("joe", "123456")
-//deletePlan("joe", 6061ede581737cf549fecb5c)
-// register('yas', 'pass');
-// login('yas', 'pass')
-// addListItem("yas", "test Item")
-// deleteListItems("yas", "test Item");
-// getListItems("yas");
-
-//getPlans('yas', 'user').then(data => {console.log(data); return data})
-
-
-// x.then(function(result) {
-//     console.log(result) // "Some User token"
-//  })
-
-//getPlanDetails('6061ede581737cf549fecb5c');
-
-//var t = getPlanId("joe", "plan11").then(data => {console.log("DATA: ", data); return data})
-// console.log("TTTT: ", t)
 
 module.exports = {
     url,

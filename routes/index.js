@@ -10,7 +10,7 @@ router.get('/login', async function(req, res) { // renders a given hbs for given
   res.render('login', { title: 'Login'})
 });
 
-router.post('/login', async function(req, res) { // renders a given hbs for given endpoint
+router.post('/login', async function(req, res) { 
   var {
     username,
     password,
@@ -83,21 +83,6 @@ router.get('/logout', ensureLoggedIn, async function(req, res) {
   res.status(200).end();
 });
 
-router.get('/test/:planName/:person', ensureLoggedIn, async function(req, res) {
-  var { username } = req.session;
-  const planName = req.params.planName;
-  const person = req.params.person;
-
-  console.log("SEND");
-  console.log("PLAN NAME: ", planName);
-  console.log("SEND TO: ", person);
-  var plans = await db.getPlans(username, "advisor");
-  var planID = db.getId(username, plans, planName);
-
-  await db.sendPlan(person, planID);
-  res.status(200).end();
-});
-
 router.delete('/deleteProfile/:username', ensureLoggedIn, async function(req, res) {
   const response = await db.deleteProfile(req.params.username);
   if(!response){
@@ -107,35 +92,34 @@ router.delete('/deleteProfile/:username', ensureLoggedIn, async function(req, re
   }
 });
 
-router.get('/plans', async function(req, res) {
+router.get('/plans', ensureLoggedIn, async function(req, res) {
   var { username } = req.session;
   const role = req.session.role;
-  console.log("ROLE: ", role)
   var isUser;
-  if (role == 'user'){
+  if (role == 'user') {
     isUser = true;
   } else {
     isUser = false;
   }
+  
   var plans = await db.getPlans(username, role)
   console.log("PLANS: ", plans )
   var names = db.getNames(plans)
+  
   res.render('plans', { 
     username,
-    items: names,//await db.getPlans('joe')//.then(data => {console.log(data); return data}),
+    items: names,
     user: isUser, 
     viewPending: false,
-  }); //replaces username in index file
+  }); 
 });
 
 
-router.post('/plans', async function(req, res) {
+router.post('/plans', ensureLoggedIn, async function(req, res) {
   var { username } = req.session;
-  console.log("USERNAME :", username)
   const role = req.session.role;
-  console.log("ROLE: ", role)
   var isUser;
-  if (role == 'user'){
+  if (role == 'user') {
     isUser = true;
   } else {
     isUser = false;
@@ -144,12 +128,18 @@ router.post('/plans', async function(req, res) {
   if (req.body.view) { // check condition based on the existance of the delete  variable
     console.log("VIEW")
     var planName = req.body.view
-    console.log("PLAN NAME: ", planName)
     var plans = await db.getPlans(username, req.session.role)
     var planID = db.getId(username, plans, planName)
     var plan = await db.getPlanDetails(planID)
-    console.log(plan)
-    res.render('budget', {name: plan['PlanName'], start: plan.StartDate, end: plan.EndDate, total: plan.totalSpent, categories: plan.categories, isUser: isUser})
+    
+    res.render('budget', {
+      name: plan.PlanName, 
+      start: plan.StartDate, 
+      end: plan.EndDate, 
+      total: plan.totalSpent, 
+      categories: plan.categories, 
+      isUser: isUser
+    });
   
   } else if (req.body.edit) {
     // ola
@@ -161,7 +151,7 @@ router.post('/plans', async function(req, res) {
     var planName = req.body.delete
     var plans = await db.getPlans(username, req.session.role)
     var planID = db.getId(username, plans, planName)
-    console.log("index ID: ", planID)
+    
     await db.deletePlan(username, planID, role)
     res.redirect('/plans')
 
@@ -173,47 +163,62 @@ router.post('/plans', async function(req, res) {
   } 
 });
 
-router.get('/pendingPlans', async function(req, res) {
+router.get('/send/:planName/:person', ensureLoggedIn, async function(req, res) {
+  var { username } = req.session;
+  const planName = req.params.planName;
+  const person = req.params.person;
+  var plans = await db.getPlans(username, "advisor");
+  var planID = db.getId(username, plans, planName);
+
+  await db.sendPlan(person, planID);
+  res.status(200).end();
+});
+
+router.get('/pendingPlans', ensureLoggedIn, async function(req, res) {
   var { username } = req.session;
   var plans = await db.getPendingPlans(username)
-  console.log("Pending PLANS: ", plans )
   var names = db.getNames(plans)
+  
   res.render('plans', { 
     username,
     items: names,
     user: true,
     viewPending: true,
   }); 
+
 });
 
-router.post('/pendingPlans', async function(req, res) {
+router.post('/pendingPlans', ensureLoggedIn, async function(req, res) {
   var { username } = req.session;
-  console.log("USERNAME: ", username)
   const role = req.session.role;
-  console.log("ROLE: ", role)
   var isUser;
-  if (role == 'user'){
+  if (role == 'user') {
     isUser = true;
   } else {
     isUser = false;
   }
 
-  if (req.body.view) { // check condition based on the existance of the delete  variable
+  if (req.body.view) { 
     console.log("VIEW")
     var planName = req.body.view
-    console.log("PLAN NAME: ", planName)
     var plans = await db.getPendingPlans(username)
     var planID = db.getId(username, plans, planName)
     var plan = await db.getPlanDetails(planID)
-    console.log(plan)
-    res.render('budget', {name: plan['PlanName'], start: plan.StartDate, end: plan.EndDate, total: plan.totalSpent, categories: plan.categories, user: isUser})
+
+    res.render('budget', {
+      name: plan.PlanName, 
+      start: plan.StartDate, 
+      end: plan.EndDate, 
+      total: plan.totalSpent, 
+      categories: plan.categories, 
+      user: isUser
+    });
   
   } else if (req.body.delete) {
     console.log("DELETE")
     var planName = req.body.delete
     var plans = await db.getPendingPlans(username)
     var planID = db.getId(username, plans, planName)
-    console.log("index ID: ", planID)
 
     await db.deletePendingPlan(username, planID)
     res.redirect('/pendingPlans')
@@ -221,10 +226,7 @@ router.post('/pendingPlans', async function(req, res) {
   } else if (req.body.accept) {
     console.log("ACCEPT")
     var planName = req.body.accept;
-    //console.log("PLAN NAME:: ", planName)
     var plans = await db.getPendingPlans(username, 'user')
-    //console.log("PLANS:: ", plans)
-
     var planID = db.getId(username, plans, planName)
 
     await db.acceptPlan(username, planID)
@@ -240,5 +242,3 @@ router.post('/pendingPlans', async function(req, res) {
 });
 
 module.exports = router;
-
-//6063a45645a263d677595d42, 6064c88b428ee6a84059c1d4, 60639ff045a263d677595d41
