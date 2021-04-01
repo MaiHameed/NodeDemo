@@ -117,13 +117,26 @@ router.post('/account', ensureLoggedIn, async function(req, res){
   } = req.body;
   const username = req.session.username;
   var money = await db.getFunds(username);
+  var invalid;
   
   if(add){
-    await db.addFunds(username, addDollars)
+      if(parseInt(addDollars) > 0){
+        await db.addFunds(username, addDollars);
+        res.redirect('/account');
+      } else{
+        console.log("invalid add amount entered.")
+      }
+  } else if (remove){
+      console.log(remDollars);
+      console.log(money);
+      if(parseInt(remDollars) < parseInt(money)){
+        invalid=false;
+        await db.removeFunds(username, remDollars);
+        res.redirect('/account');
+      } else {
+        console.log("invalid remove amount entered.");
+      }
   }
-  // else if (remove){
-
-  // }
 });
 
 module.exports = router;

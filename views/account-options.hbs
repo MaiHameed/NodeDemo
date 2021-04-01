@@ -70,19 +70,33 @@
         cursor: pointer; /* Add a pointer on hover */
     }
 
+    button[type="return"]{
+        font-size: 100%;
+        background-color: darkorange;
+    }
+
+    .error{
+        color : red;
+        display : none;
+    }
+
 </style>
 <body>
+    <h2> Fund Options:</h2>
     <button onclick="fundsOverlay()"> Add Funds </button>
     <br>
     <button onclick="fundsOverlayRemove()"> Remove Funds </button>
     <br>
+    <h2> Plan Options:</h2>
     <input name="viewPlanList" value="View Active Plans" type="submit">
     <br>
     <input name="viewPendingPlans" value="View Pending Plans" type="submit">
     <br>
     <input name="createPlan" value="Create New Plan" type="submit">
     <br>
-    <button onclick="window.location.href='/'">Return to Overview</button>
+    <br>
+    <br>
+    <button type="return" onclick="window.location.href='/'"> Return to Overview</button>
 
     <div id='fundsoverlay'>
         <form method="POST">
@@ -91,8 +105,9 @@
                 {{#if isUser}}
                 <h2> Total Funds: ${{funds}}</h2>
                 {{/if}}
-                <input name="addDollars" type="amount" placeholder= "Amount to Add">
-                <input name="add" value="Remove Funds" type="submit">
+                <input id="addDollars" name="addDollars" type="amount" placeholder= "Amount to Add">
+                <p id="adderror" class="error"> Invalid Amount. Try again. </p>
+                <input name="add" value="Add Funds" type="submit" onclick="addError()">
                 <div class="result"></div>
             </div>
         </form>
@@ -104,11 +119,12 @@
             <div class="overlay-content">
                 <span class="close" onclick="off()">&times;</span>
                 {{#if isUser}}
-                <h2> Total Funds: ${{funds}}</h2>
+                    <h2> Total Funds: ${{funds}}</h2>
                 {{/if}}
-                <input id='remDllars' name="dollars" type="text" placeholder= "Amount to Remove">
-                <input name="remove" value="Remove Funds" type="submit">
-                
+                <input id="remDollars" name="remDollars" type="text" placeholder= "Amount to Remove">
+                <p id="remerror" class="error"> Invalid Amount. Try again. </p>
+                <input name="remove" value="Remove Funds" type="submit" onclick="remError()">
+
             </div>
         </form>
     </div>
@@ -123,6 +139,21 @@
     function off(){
         document.getElementById("fundsoverlay").style.display = "none";
         document.getElementById("fundsoverlay-remove").style.display = "none";
+    }
+    function remError(){
+        var remAmount = document.getElementById("remDollars").value;
+        var total = {{funds}};
+
+        if (remAmount > total) {
+            document.getElementById("remerror").style.display = 'flex';
+        } 
+    }
+    function addError(){
+        var addAmount = document.getElementById("addDollars").value;
+
+        if (parseInt(addAmount) < 0) {
+            document.getElementById("adderror").style.display = 'flex';
+        } 
     }
 </script>
 </html>
