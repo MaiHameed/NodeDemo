@@ -118,7 +118,7 @@
                 {{#if isUser}}
                     <h2> Total Funds: ${{funds}}</h2>
                 {{/if}}
-                <input id="addDollars" name="addDollars" type="amount" placeholder= "Amount to Add">
+                <input id="addDollars" name="addDollars" type="number" placeholder= "Amount to Add">
                 <p id="adderror" class="error"> Invalid Amount. Try again. </p>
                 <input name="add" value="Add Funds" type="submit" onclick="addError()">
                 <div class="result"></div>
@@ -134,7 +134,7 @@
                 {{#if isUser}}
                     <h2> Total Funds: ${{funds}}</h2>
                 {{/if}}
-                <input id="remDollars" name="remDollars" type="text" placeholder= "Amount to Remove">
+                <input id="remDollars" name="remDollars" type="number" placeholder= "Amount to Remove">
                 <p id="remerror" class="error"> Invalid Amount. Try again. </p>
                 <input name="remove" value="Remove Funds" type="submit" onclick="remError()">
             </div>
