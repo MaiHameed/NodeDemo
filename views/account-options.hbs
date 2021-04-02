@@ -158,14 +158,18 @@
 
         if (remAmount > total) {
             document.getElementById("remerror").style.display = 'flex';
-        } 
+        } else if(isNaN(remAmount)){
+            document.getElementById("remerror").style.display = 'flex';
+        }
     }
     function addError(){
         var addAmount = document.getElementById("addDollars").value;
 
         if (parseInt(addAmount) < 0) {
             document.getElementById("adderror").style.display = 'flex';
-        } 
+        } else if(isNaN(addAmount)){
+            document.getElementById("adderror").style.display = 'flex';
+        }
     }
 </script>
 </html>
