@@ -92,7 +92,6 @@ router.delete('/deleteProfile/:username', ensureLoggedIn, async function(req, re
 });
 
 router.get('/account', ensureLoggedIn, async function(req, res){
-  // console.log("In account")
   const username = req.session.username;
   const role = req.session.role;
   var isUser;
@@ -104,6 +103,12 @@ router.get('/account', ensureLoggedIn, async function(req, res){
       isUser
   });
     
+  }else{
+    isUser = false;
+    res.render('account-options', {
+      title: 'Account Options',
+      isUser
+    });
   }
   
 });
@@ -120,7 +125,7 @@ router.post('/account', ensureLoggedIn, async function(req, res){
   var invalid;
   
   if(add){
-      if(parseInt(addDollars) > 0){
+      if(parseInt(addDollars) >= 0){
         await db.addFunds(username, addDollars);
         res.redirect('/account');
       } else{
@@ -129,7 +134,7 @@ router.post('/account', ensureLoggedIn, async function(req, res){
   } else if (remove){
       console.log(remDollars);
       console.log(money);
-      if(parseInt(remDollars) < parseInt(money)){
+      if(parseInt(remDollars) <= parseInt(money)){
         invalid=false;
         await db.removeFunds(username, remDollars);
         res.redirect('/account');

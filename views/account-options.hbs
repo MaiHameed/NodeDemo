@@ -12,7 +12,7 @@
         right: 0;
         bottom: 0;
         background-color: rgb(0, 0, 0);
-        background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+        background-color: rgba(0,0,0,0.7); /* Black background with opacity */
         z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
         justify-content: center;
         align-items: center;
@@ -28,7 +28,7 @@
         right: 0;
         bottom: 0;
         background-color: rgb(0, 0, 0);
-        background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+        background-color: rgba(0,0,0,0.7); /* Black background with opacity */
         z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
         justify-content: center;
         align-items: center;
@@ -46,6 +46,10 @@
     }
     h2 {
         color: black;
+    }
+
+    h2[type="fundheader"]{
+        color: #555;
     }
 
     input {
@@ -75,6 +79,10 @@
         background-color: darkorange;
     }
 
+    button[type="deactivate"]{
+        font-size: 100%;
+        color: green;
+    }
     .error{
         color : red;
         display : none;
@@ -82,28 +90,33 @@
 
 </style>
 <body>
-    <h2> Fund Options:</h2>
-    <button onclick="fundsOverlay()"> Add Funds </button>
-    <br>
-    <button onclick="fundsOverlayRemove()"> Remove Funds </button>
-    <br>
+    {{#if isUser}}
+        <h2 type="fundheader"> Total Funds: ${{funds}}</h2>
+        <h2> Fund Options:</h2>
+        <button onclick="fundsOverlay()"> Add Funds </button>
+        <br>
+        <button onclick="fundsOverlayRemove()"> Remove Funds </button>
+        <br>
+    {{/if}}
+
     <h2> Plan Options:</h2>
-    <input name="viewPlanList" value="View Active Plans" type="submit">
+    <button onclick = "window.location.href='/plans'"> View Active Plans </button> 
     <br>
-    <input name="viewPendingPlans" value="View Pending Plans" type="submit">
+    <button onclick = "window.location.href='/pendingPlans'"> View Pending Plans </button>
     <br>
-    <input name="createPlan" value="Create New Plan" type="submit">
+    <button onclick = "window.location.href='/createPlan'"> Create Plan </button>
     <br>
     <br>
     <br>
-    <button type="return" onclick="window.location.href='/'"> Return to Overview</button>
+    <button type="return" onclick="window.location.href='/'"> Return to Overview </button>
+    <br>
 
     <div id='fundsoverlay'>
         <form method="POST">
             <div class="overlay-content">
                 <span class="close" onclick="off()">&times;</span>
                 {{#if isUser}}
-                <h2> Total Funds: ${{funds}}</h2>
+                    <h2> Total Funds: ${{funds}}</h2>
                 {{/if}}
                 <input id="addDollars" name="addDollars" type="amount" placeholder= "Amount to Add">
                 <p id="adderror" class="error"> Invalid Amount. Try again. </p>
@@ -124,7 +137,6 @@
                 <input id="remDollars" name="remDollars" type="text" placeholder= "Amount to Remove">
                 <p id="remerror" class="error"> Invalid Amount. Try again. </p>
                 <input name="remove" value="Remove Funds" type="submit" onclick="remError()">
-
             </div>
         </form>
     </div>
