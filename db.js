@@ -7,14 +7,21 @@ if (process.env.TEST) {
 }
 
 var db = null;
+var client = null;
 async function connect() {
     if (db == null) {
         var options = {useUnifiedTopology: true};
 
-        var connection = await MongoClient.connect(url, options);
-        connection.db("cps888");
-
-        db = await connection.db("cps888");
+        client = await MongoClient.connect(url, options);
+        
+        if (process.env.TEST) {
+            client.db("cps888");
+            db = await client.db("cps888");
+        } else {
+            client.db("cps888");
+            db = await client.db("cps888");
+        }
+        
     }
 
     return db;
@@ -392,6 +399,10 @@ async function removeFunds(username, amount){
     console.log(await getFunds(username));    
 }
 
+async function close(){
+    await client.close();
+}
+
 module.exports = {
     url,
     login,
@@ -410,4 +421,15 @@ module.exports = {
     getName,
     addFunds,
     removeFunds,
+    close
 };
+
+async function wipe() {
+    var conn = await connect();
+    conn.collection("users").drop();
+    conn.collection("advisors").drop();
+}
+
+if (process.env.TEST) {
+    module.exports.wipe = wipe;
+}
