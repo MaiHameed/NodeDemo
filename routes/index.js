@@ -156,7 +156,7 @@ router.post('/plans', ensureLoggedIn, async function(req, res) {
     res.redirect('/plans')
 
   } else if (req.body.home) {
-    res.redirect('/')
+    res.redirect('/account')
   } 
   else if (req.body.back) {
     res.redirect('/plans')
@@ -234,11 +234,63 @@ router.post('/pendingPlans', ensureLoggedIn, async function(req, res) {
 
   }
   else if (req.body.home) {
-    res.redirect('/')
+    res.redirect('/account')
   } 
   else if (req.body.back) {
     res.redirect('/pendingPlans')
   } 
+});
+router.get('/account', ensureLoggedIn, async function(req, res){
+  const username = req.session.username;
+  const role = req.session.role;
+  var isUser;
+  if (role == 'user'){
+    isUser = true;
+    res.render('account-options', {
+      title: 'Account Options',
+      funds : await db.getFunds(username),
+      isUser
+  });
+    
+  }else{
+    isUser = false;
+    res.render('account-options', {
+      title: 'Account Options',
+      isUser
+    });
+  }
+  
+});
+
+router.post('/account', ensureLoggedIn, async function(req, res){
+  var{
+    addDollars,
+    remDollars,
+    add,
+    remove,
+  } = req.body;
+  const username = req.session.username;
+  var money = await db.getFunds(username);
+  var invalid;
+  
+  if(add){
+      if(parseInt(addDollars) >= 0){
+        await db.addFunds(username, addDollars);
+        res.redirect('/account');
+      } else{
+        console.log("invalid add amount entered.")
+      }
+  } else if (remove){
+      console.log(remDollars);
+      console.log(money);
+      if(parseInt(remDollars) <= parseInt(money)){
+        invalid=false;
+        await db.removeFunds(username, remDollars);
+        res.redirect('/account');
+      } else {
+        console.log("invalid remove amount entered.");
+      }
+  }
 });
 
 module.exports = router;

@@ -1,0 +1,178 @@
+<html>
+<h1>ACCOUNT OPTIONS</h1>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+    #fundsoverlay {
+        position: fixed; /* Sit on top of the page content */
+        display: none; /* Hidden by default */
+        width: 100%; /* Full width (cover the whole page) */
+        height: 100%; /* Full height (cover the whole page) */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0,0,0,0.7); /* Black background with opacity */
+        z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+        justify-content: center;
+        align-items: center;
+    }
+
+    #fundsoverlay-remove {
+        position: fixed; /* Sit on top of the page content */
+        display: none; /* Hidden by default */
+        width: 100%; /* Full width (cover the whole page) */
+        height: 100%; /* Full height (cover the whole page) */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0,0,0,0.7); /* Black background with opacity */
+        z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+        justify-content: center;
+        align-items: center;
+    }
+    .overlay-content{
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+        align-items: center;
+        margin: 15% auto; /* 15% from the top and centered */ 
+        padding: 20px;
+        border: 1px solid white;
+        width: 80%; /* Could be more or less, depending on screen size */
+        
+    }
+    h2 {
+        color: black;
+    }
+
+    h2[type="fundheader"]{
+        color: #555;
+    }
+
+    input {
+        border : 0;
+        outline : 0;
+        
+        background-color: greenyellow;
+        padding : 10px;
+        
+        width : 300px;
+        box-sizing : border-box;
+    }
+
+    input[type="text"]{
+        text-align: center;
+    }
+
+    .close {
+        color: blueviolet;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer; /* Add a pointer on hover */
+    }
+
+    button[type="return"]{
+        font-size: 100%;
+        background-color: darkorange;
+        cursor: pointer;
+    }
+
+    button[type="deactivate"]{
+        font-size: 100%;
+        color: green;
+    }
+    .error{
+        color : red;
+        display : none;
+    }
+
+</style>
+<body>
+    {{#if isUser}}
+        <h2 type="fundheader"> Total Funds: ${{funds}}</h2>
+        <h2> Fund Options:</h2>
+        <button onclick="fundsOverlay()"> Add Funds </button>
+        <br>
+        <button onclick="fundsOverlayRemove()"> Remove Funds </button>
+        <br>
+    {{/if}}
+
+    <h2> Plan Options:</h2>
+    <button onclick = "window.location.href='/plans'"> View Active Plans </button> 
+    <br>
+    {{#if isUser}}
+    <button onclick = "window.location.href='/pendingPlans'"> View Pending Plans </button>
+    <br>
+    {{/if}}
+    <button onclick = "window.location.href='/createPlan'"> Create Plan </button>
+    <br>
+    <br>
+    <br>
+    <button type="return" onclick="window.location.href='/'"> Return to Overview </button>
+    <br>
+
+    <div id='fundsoverlay'>
+        <form method="POST">
+            <div class="overlay-content">
+                <span class="close" onclick="off()">&times;</span>
+                {{#if isUser}}
+                    <h2> Total Funds: ${{funds}}</h2>
+                {{/if}}
+                <input id="addDollars" name="addDollars" type="number" placeholder= "Amount to Add">
+                <p id="adderror" class="error"> Invalid Amount. Try again. </p>
+                <input name="add" value="Add Funds" type="submit" onclick="addError()">
+                <div class="result"></div>
+            </div>
+        </form>
+        
+    </div>
+
+    <div id='fundsoverlay-remove'>
+        <form method="POST">
+            <div class="overlay-content">
+                <span class="close" onclick="off()">&times;</span>
+                {{#if isUser}}
+                    <h2> Total Funds: ${{funds}}</h2>
+                {{/if}}
+                <input id="remDollars" name="remDollars" type="number" placeholder= "Amount to Remove">
+                <p id="remerror" class="error"> Invalid Amount. Try again. </p>
+                <input name="remove" value="Remove Funds" type="submit" onclick="remError()">
+            </div>
+        </form>
+    </div>
+</body>
+<script>
+    function fundsOverlay(){
+        document.getElementById("fundsoverlay").style.display = "flex";
+    }
+    function fundsOverlayRemove(){
+        document.getElementById("fundsoverlay-remove").style.display = "flex";
+    }
+    function off(){
+        document.getElementById("fundsoverlay").style.display = "none";
+        document.getElementById("fundsoverlay-remove").style.display = "none";
+    }
+    function remError(){
+        var remAmount = document.getElementById("remDollars").value;
+        var total = {{funds}};
+
+        if (remAmount > total) {
+            document.getElementById("remerror").style.display = 'flex';
+        } else if(isNaN(remAmount)){
+            document.getElementById("remerror").style.display = 'flex';
+        }
+    }
+    function addError(){
+        var addAmount = document.getElementById("addDollars").value;
+
+        if (parseInt(addAmount) < 0) {
+            document.getElementById("adderror").style.display = 'flex';
+        } else if(isNaN(addAmount)){
+            document.getElementById("adderror").style.display = 'flex';
+        }
+    }
+</script>
+</html>

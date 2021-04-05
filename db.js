@@ -310,6 +310,84 @@ async function sendPlan(username, planID) { // Adds plan ID to users pending pla
     const result = await conn.collection('users').updateOne(filter, updateDocument);
 }
 
+async function addFunds(username, amount){
+    var conn = await connect();
+
+    var existingFunds = await getFunds(username);
+    console.log(existingFunds);
+    // console.log("input amount: "+ amount)
+    newAmount = +existingFunds + +amount;
+    // console.log("new funds"+ newAmount);
+    await conn.collection('users').updateOne(
+        {username},
+        {
+            $set:{
+                "financialProfile.totalFunds": newAmount,
+            }
+        }
+    )
+    console.log(await getFunds(username))
+}
+
+async function addFunds(username, amount){
+    var conn = await connect();
+
+    var existingFunds = await getFunds(username);
+    console.log(existingFunds);
+    // console.log("input amount: "+ amount)
+    newAmount = +existingFunds + +amount;
+    // console.log("new funds"+ newAmount);
+    if (isNaN(existingFunds)){
+        await conn.collection('users').updateOne(
+            {username},
+            {
+                $set:{
+                    "financialProfile.totalFunds": 0,
+                }
+            }
+        )
+    }else{
+        await conn.collection('users').updateOne(
+            {username},
+            {
+                $set:{
+                    "financialProfile.totalFunds": newAmount,
+                }
+            }
+        )
+    }
+    console.log(await getFunds(username))
+}
+
+async function removeFunds(username, amount){
+    var conn = await connect();
+    var invalid;
+    var existingFunds = await getFunds(username);
+    console.log(existingFunds);
+    if (isNaN(existingFunds)){
+        await conn.collection('users').updateOne(
+            {username},
+            {
+                $set:{
+                    "financialProfile.totalFunds": 0,
+                }
+            }
+        )
+    }else{    
+        newAmount = +existingFunds - +amount;
+        // console.log("new funds"+ newAmount);
+        await conn.collection('users').updateOne(
+            {username},
+            {
+                $set:{
+                    "financialProfile.totalFunds": newAmount,
+                }
+            }
+        )
+    }
+    console.log(await getFunds(username));    
+}
+
 module.exports = {
     url,
     login,
@@ -325,5 +403,7 @@ module.exports = {
     sendPlan,
     getFunds,
     deleteProfile,
-    getName
+    getName,
+    addFunds,
+    removeFunds,
 };
