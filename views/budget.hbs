@@ -1,0 +1,34 @@
+
+<div>
+    <h1>{{ name }}</h1>
+    <br>
+    <h3>Start date:  {{ start }}</h3>
+    <h3>End date:  {{ end }}</h3>
+    <h3>Total: ${{ total }}</h3>
+    <br>
+    <h2>categories:</h2>
+    
+    {{#each categories}}
+        <h4> {{this.name}}: </h4> 
+        <h5>Budgeted: ${{this.budgeted}}</h5>
+        <h5>Spent: ${{this.spent}}</h5>
+        <br>
+    {{/each}}
+        
+    <form method="post">
+        <button type="submit" name="home" value="{{this}}">
+            Return to Account Options
+        </button>
+        <button type="submit" name="back" value="{{this}}">
+            Back
+        </button>
+    </form>
+</div>
+
+<style>
+    button[type="submit"] {
+        font-size: 100%;
+        background-color: darkorange;
+        cursor: pointer;
+    }
+</style>

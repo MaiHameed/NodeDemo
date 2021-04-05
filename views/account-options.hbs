@@ -77,6 +77,7 @@
     button[type="return"]{
         font-size: 100%;
         background-color: darkorange;
+        cursor: pointer;
     }
 
     button[type="deactivate"]{
@@ -102,8 +103,10 @@
     <h2> Plan Options:</h2>
     <button onclick = "window.location.href='/plans'"> View Active Plans </button> 
     <br>
+    {{#if isUser}}
     <button onclick = "window.location.href='/pendingPlans'"> View Pending Plans </button>
     <br>
+    {{/if}}
     <button onclick = "window.location.href='/createPlan'"> Create Plan </button>
     <br>
     <br>
