@@ -2,6 +2,10 @@ var { MongoClient, Logger } = require("mongodb");
 var bcrypt = require("bcrypt"); //for password auth
 var url = "mongodb+srv://dbUser:dbPassword@cluster0.rdapr.mongodb.net/cps888?retryWrites=true&w=majority";
 
+if (process.env.TEST) {
+    url = "mongodb+srv://dbUser:dbPassword@cluster0.rdapr.mongodb.net/cps888-test?retryWrites=true&w=majority";
+}
+
 var db = null;
 async function connect() {
     if (db == null) {
@@ -310,24 +314,24 @@ async function sendPlan(username, planID) { // Adds plan ID to users pending pla
     const result = await conn.collection('users').updateOne(filter, updateDocument);
 }
 
-async function addFunds(username, amount){
-    var conn = await connect();
+// async function addFunds(username, amount){
+//     var conn = await connect();
 
-    var existingFunds = await getFunds(username);
-    console.log(existingFunds);
-    // console.log("input amount: "+ amount)
-    newAmount = +existingFunds + +amount;
-    // console.log("new funds"+ newAmount);
-    await conn.collection('users').updateOne(
-        {username},
-        {
-            $set:{
-                "financialProfile.totalFunds": newAmount,
-            }
-        }
-    )
-    console.log(await getFunds(username))
-}
+//     var existingFunds = await getFunds(username);
+//     console.log(existingFunds);
+//     // console.log("input amount: "+ amount)
+//     newAmount = +existingFunds + +amount;
+//     // console.log("new funds"+ newAmount);
+//     await conn.collection('users').updateOne(
+//         {username},
+//         {
+//             $set:{
+//                 "financialProfile.totalFunds": newAmount,
+//             }
+//         }
+//     )
+//     console.log(await getFunds(username))
+// }
 
 async function addFunds(username, amount){
     var conn = await connect();
