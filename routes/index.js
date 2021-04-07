@@ -145,15 +145,6 @@ router.post('/plans', ensureLoggedIn, async function(req, res) {
     console.log("EDIT")
     var planName = req.body.edit
 
-  } else if (req.body.delete) {
-    console.log("DELETE")
-    var planName = req.body.delete
-    var plans = await db.getPlans(username, req.session.role)
-    var planID = db.getId(username, plans, planName)
-    
-    await db.deletePlan(username, planID, role)
-    res.redirect('/plans')
-
   } else if (req.body.home) {
     res.redirect('/account')
   } 
@@ -173,17 +164,22 @@ router.get('/send/:planName/:person', ensureLoggedIn, async function(req, res) {
   res.status(200).end();
 });
 
-router.get('/deletePln/:planName', ensureLoggedIn, async function(req, res) {
+router.get('/deletePln/:planName/:viewPending', ensureLoggedIn, async function(req, res) {
   var { username } = req.session;
   const planName = req.params.planName;
-  
-  var plans = await db.getPlans(username, req.session.role)
+  const isPending = req.params.viewPending
 
-  var planID = db.getId(username, plans, planName)
-  //console.log('HERRE')
+  if (isPending == 'true') {
 
-  await db.deletePlan(username, planID, role)
-  // console.log('HERRE')
+    var plans = await db.getPendingPlans(username, req.session.role)
+    var planID = db.getId(username, plans, planName)
+    await db.deletePendingPlan(username, planID, req.session.role)
+
+  } else {
+    var plans = await db.getPlans(username, req.session.role)
+    var planID = db.getId(username, plans, planName)
+    await db.deletePlan(username, planID, req.session.role)
+  }
 
   res.status(200).end();
 
@@ -229,15 +225,6 @@ router.post('/pendingPlans', ensureLoggedIn, async function(req, res) {
       user: isUser
     });
   
-  } else if (req.body.delete) {
-    console.log("DELETE")
-    var planName = req.body.delete
-    var plans = await db.getPendingPlans(username)
-    var planID = db.getId(username, plans, planName)
-
-    await db.deletePendingPlan(username, planID)
-    res.redirect('/pendingPlans')
-
   } else if (req.body.accept) {
     console.log("ACCEPT")
     var planName = req.body.accept;
@@ -255,6 +242,8 @@ router.post('/pendingPlans', ensureLoggedIn, async function(req, res) {
     res.redirect('/pendingPlans')
   } 
 });
+
+
 router.get('/account', ensureLoggedIn, async function(req, res){
   const username = req.session.username;
   const role = req.session.role;
@@ -267,7 +256,7 @@ router.get('/account', ensureLoggedIn, async function(req, res){
       isUser
   });
     
-  }else{
+  } else{
     isUser = false;
     res.render('account-options', {
       title: 'Account Options',
