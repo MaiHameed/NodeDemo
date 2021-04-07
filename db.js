@@ -180,7 +180,6 @@ function getId(user, plans, planName) { // Returns ID of a plan associated with 
     var id = null
     plans.forEach(function(plan) {
         if (plan.PlanName == planName) {
-            console.log("ID: ", plan._id)
             id = plan._id;
         }
     });
@@ -188,9 +187,12 @@ function getId(user, plans, planName) { // Returns ID of a plan associated with 
 }
 
 async function deletePlan(username, planID, role) { // Removes given plan from user plan list, and deletes plan object
+    console.log('HERRE')
+
     var conn = await connect();
     var ObjectId = require('mongodb').ObjectID;
 
+    console.log(username, " ", role, " ", planID)
     if (role == 'user') {
         var user = await conn.collection('users').findOne({ username });
         var planIds = user.financialProfile.plans;

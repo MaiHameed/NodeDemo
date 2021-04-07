@@ -103,7 +103,6 @@ router.get('/plans', ensureLoggedIn, async function(req, res) {
   }
   
   var plans = await db.getPlans(username, role)
-  console.log("PLANS: ", plans )
   var names = db.getNames(plans)
   
   res.render('plans', { 
@@ -172,6 +171,22 @@ router.get('/send/:planName/:person', ensureLoggedIn, async function(req, res) {
 
   await db.sendPlan(person, planID);
   res.status(200).end();
+});
+
+router.get('/deletePln/:planName', ensureLoggedIn, async function(req, res) {
+  var { username } = req.session;
+  const planName = req.params.planName;
+  
+  var plans = await db.getPlans(username, req.session.role)
+
+  var planID = db.getId(username, plans, planName)
+  //console.log('HERRE')
+
+  await db.deletePlan(username, planID, role)
+  // console.log('HERRE')
+
+  res.status(200).end();
+
 });
 
 router.get('/pendingPlans', ensureLoggedIn, async function(req, res) {
