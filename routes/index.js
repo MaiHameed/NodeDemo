@@ -252,6 +252,7 @@ router.post('/pendingPlans', ensureLoggedIn, async function(req, res) {
   } 
 });
 
+
 router.get('/addPlan', ensureLoggedIn, async function (req,res){
   res.render('addPlan', {title : 'Add Plan'}) 
 });
@@ -303,11 +304,6 @@ router.post('/addPlanCategories', ensureLoggedIn, async function(req, res){
     res.redirect('/account')
   }
 });
-
-
-
-
-
 
 router.get('/account', ensureLoggedIn, async function(req, res){
   const username = req.session.username;
