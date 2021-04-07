@@ -60,7 +60,7 @@ async function login(username, password) {
     var advisor = await conn.collection('advisors').findOne({ username });
 
     if (user == null && advisor == null) {
-        throw new Error('Profile does not exsist!');
+        throw new Error('Account does not exsist!');
     }else if(user == null){
         var valid = await bcrypt.compare(password, advisor.passwordHash);
         var role = 'advisor';
@@ -101,7 +101,7 @@ async function getName(username){
     }
 }
 
-async function deleteProfile(username){
+async function deleteAccount(username){
     var conn = await connect();
     await conn.collection('users').deleteOne({ username: username });
     await conn.collection('advisors').deleteOne({ username: username });
@@ -576,7 +576,7 @@ module.exports = {
     acceptPlan,
     sendPlan,
     getFunds,
-    deleteProfile,
+    deleteAccount,
     getName,
     addFunds,
     removeFunds,

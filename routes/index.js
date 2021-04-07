@@ -18,6 +18,10 @@ router.post('/login', async function(req, res) {
     register
   } = req.body;
 
+  if(isInvalid(username) || isInvalid(password)){
+    throw new Error("Invalid submission!");
+  }
+
   if(register){
     res.redirect('/register');
   }else if(login){
@@ -28,17 +32,30 @@ router.post('/login', async function(req, res) {
   }
 });
 
+// Helper function to check if string is null/undefined/empty
+function isInvalid(str){
+  return(!str || 
+    str.length === 0 ||
+    str === '' ||
+    str === 'undefined' ||
+    /^\s*$/.test(str));
+}
+
 router.post('/register', async function(req, res) {
   var { name,
         username, 
         password, 
         role } = req.body; // these values coming from login.hbs file
 
-  await db.register(name, username, password, role);
-  req.session.username = username;
-  req.session.role = role;
-  console.log(role);
-  res.redirect('/');
+  if (isInvalid(name) || isInvalid(username) || isInvalid(password)){
+    throw new Error("Invalid submission!");
+  }else{
+    await db.register(name, username, password, role);
+    req.session.username = username;
+    req.session.role = role;
+    console.log(role);
+    res.redirect('/');
+  }
 });
 
 router.get('/register', async function(req,res){
@@ -83,8 +100,8 @@ router.get('/logout', ensureLoggedIn, async function(req, res) {
   res.status(200).end();
 });
 
-router.delete('/deleteProfile/:username', ensureLoggedIn, async function(req, res) {
-  const response = await db.deleteProfile(req.params.username);
+router.delete('/deleteAccount/:username', ensureLoggedIn, async function(req, res) {
+  const response = await db.deleteAccount(req.params.username);
   if(!response){
     res.status(200).end();
   } else{
