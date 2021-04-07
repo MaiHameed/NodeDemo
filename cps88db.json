@@ -1,0 +1,30 @@
+"User": {
+    "username": "username",
+    "Name": "Name",
+    "FinancialProfile" :{
+        "Plans": ["id1", "id2"],
+        "Pending Plans": ["id1", "id2"],
+        "total Funds": 1
+    }
+}
+
+"Financial Advisor": {
+    "username": "username",
+    "Name": "Name",
+    "Plans": ["id1", "id2"],
+    "Advisor type": "type",
+}
+
+"Budget Plan": {
+    "id": "id",
+    "total allotted": 1,
+    "PlanName": "name",
+    "StartDate": "date",
+    "EndDate": "date",
+    "totalSpent": 1,
+    "categories": [{
+        "budgeted": 1,
+        "spent": 1,
+        "name": "name"
+    }]
+}
