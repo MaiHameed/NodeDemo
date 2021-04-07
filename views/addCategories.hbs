@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+<h2>Categories: </h2>
+<form method= "post">
+    <ul> 
+        {{#each categories}}
+        <li>
+        <div class="item-text"> {{this}} </div>
+        <button type = "submit" name = "deleteCategory" value = "{{this}}">
+            Delete            
+        </button>
+        </li>
+        {{/each}}
+    </ul>
+    <input name = "CategoryName" placeholder="Category Name">
+    <input name = "Budgeted" placeholder="Amount Budgeted" type="number" step = "any">
+    <input name = "Spent" placeholder="Amount Spent"  type="number" step = "any">
+    <input name = "addCategory"type= "submit" value = "Add Category">
+    <br>
+        <button type="return" name="submitPlans">
+            Submit Plan
+        </button>
+</form>
+</body>
+<style>
+    button[type="return"]{
+        font-size: 100%;
+        background-color: darkorange;
+        cursor: pointer;
+    }
+</style>
+</html>
