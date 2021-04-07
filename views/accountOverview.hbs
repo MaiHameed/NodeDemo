@@ -8,7 +8,7 @@
     <div class='loginDiv'>
         <button onclick="window.location.href='/account'">Account Options</button>
         <br>
-        <button onclick="deleteProfile()">Delete Profile</button>
+        <button onclick="deleteAccount()">Delete Account</button>
         <br>
         <button onclick="logout()">Logout</button>
     </div>
@@ -17,9 +17,9 @@
     {{/if}}
 </body>
 <script>
-    async function deleteProfile() {
+    async function deleteAccount() {
         if (confirm('Are you sure?')) {
-            var res = await fetch('/deleteProfile/'+'{{username}}', { method: 'DELETE' });
+            var res = await fetch('/deleteAccount/'+'{{username}}', { method: 'DELETE' });
             if(res.status == 200){
                 res = await fetch('/logout', { method: 'GET' });
                 if(res.status == 200){
