@@ -3,15 +3,26 @@ var bcrypt = require("bcrypt"); //for password auth
 var url = "mongodb+srv://dbUser:dbPassword@cluster0.rdapr.mongodb.net/cps888?retryWrites=true&w=majority";
 var plan_name_edit = "";
 
+if (process.env.TEST) {
+    url = "mongodb+srv://dbUser:dbPassword@cluster0.rdapr.mongodb.net/cps888-test?retryWrites=true&w=majority";
+}
+
 var db = null;
+var client = null;
 async function connect() {
     if (db == null) {
         var options = {useUnifiedTopology: true};
 
-        var connection = await MongoClient.connect(url, options);
-        connection.db("cps888");
-
-        db = await connection.db("cps888");
+        client = await MongoClient.connect(url, options);
+        
+        if (process.env.TEST) {
+            client.db("cps888");
+            db = await client.db("cps888");
+        } else {
+            client.db("cps888");
+            db = await client.db("cps888");
+        }
+        
     }
 
     return db;
@@ -172,7 +183,6 @@ function getId(user, plans, planName) { // Returns ID of a plan associated with 
     var id = null
     plans.forEach(function(plan) {
         if (plan.PlanName == planName) {
-            console.log("ID: ", plan._id)
             id = plan._id;
         }
     });
@@ -313,24 +323,6 @@ async function sendPlan(username, planID) { // Adds plan ID to users pending pla
     const result = await conn.collection('users').updateOne(filter, updateDocument);
 }
 
-async function addFunds(username, amount){
-    var conn = await connect();
-
-    var existingFunds = await getFunds(username);
-    console.log(existingFunds);
-    // console.log("input amount: "+ amount)
-    newAmount = +existingFunds + +amount;
-    // console.log("new funds"+ newAmount);
-    await conn.collection('users').updateOne(
-        {username},
-        {
-            $set:{
-                "financialProfile.totalFunds": newAmount,
-            }
-        }
-    )
-    console.log(await getFunds(username))
-}
 
 async function addFunds(username, amount){
     var conn = await connect();
@@ -390,8 +382,6 @@ async function removeFunds(username, amount){
     }
     console.log(await getFunds(username));    
 }
-
-
 
 async function addPlan (username, role, PlanName, StartDate, EndDate){
     var conn = await connect();
@@ -701,6 +691,9 @@ async function editCategory (username, role, categoryname, new_cat_name, new_bud
        
 }
 
+async function close(){
+    await client.close();
+}
 
 module.exports = {
     url,
@@ -729,7 +722,20 @@ module.exports = {
     getPlanName,
     clearPlanName,
     getCategories,
+    deleteCategory,
     editPlan,
     editCategory,
-    deleteEditCategory
+    deleteEditCategory,
+    close
 };
+
+async function wipe() {
+    var conn = await connect();
+    conn.collection("users").drop();
+    conn.collection("advisors").drop();
+}
+
+if (process.env.TEST) {
+    module.exports.wipe = wipe;
+}
+   
