@@ -22,8 +22,8 @@
                         </button>
                     
                     {{else}}
-                        <button type="submit" name="edit" value="{{this}}">
-                            Edit
+                        <button onclick="editPlan('{{this}}')" type="submit" name="edit" value="{{this}}" >
+                            Edit plan
                         </button>
                     {{/if}}
 
@@ -54,6 +54,11 @@
         if(res.status == 200){
             console.log("Successfully sent "+planName+" to "+person)
         }
+    }
+
+        async function editPlan(planName){
+
+        const res = await fetch('/edit/'+planName, { method: 'GET' });
     }
 </script>
 <style>

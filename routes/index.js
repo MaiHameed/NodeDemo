@@ -4,6 +4,7 @@ const { Logger } = require('mongodb');
 const { response } = require('../app');
 var router = express.Router();
 var db = require("../db")
+var plan_name_edit = "";
 
 // User login page
 router.get('/login', async function(req, res) { // renders a given hbs for given endpoint
@@ -158,22 +159,12 @@ router.post('/plans', ensureLoggedIn, async function(req, res) {
     });
   
   } else if (req.body.edit) {
-    console.log("EDIT")
-    var planName = req.body.edit
-    var plans = await db.getPlans(username, req.session.role)
-    var planID = db.getId(username, plans, planName)
-    var plan = await db.getPlanDetails(planID)
-    
-    res.render('budget', {
-      name: plan.PlanName, 
-      start: plan.StartDate, 
-      end: plan.EndDate, 
-      total: plan.totalSpent, 
-      categories: plan.categories, 
-      isUser: isUser
-    });
+      console.log("EDIT")
+    var planName = req.body.edit;
+    await db.savePlanName(planName);
+    res.redirect('/editplan')
 
-  } else if (req.body.delete) {
+  }else if (req.body.delete) {
     console.log("DELETE")
     var planName = req.body.delete
     var plans = await db.getPlans(username, req.session.role)
@@ -284,7 +275,13 @@ router.post('/addPlan', ensureLoggedIn, async function(req, res){
   console.log(username);
   if (req.body.submitPlan){
     await db.addPlan(username, role, PlanName, StartDate, EndDate);
-    res.redirect('/addPlanCategories');
+    
+    if(isInvalid(PlanName)){
+      throw new Error("Invalid submission!");
+    }else{
+    res.redirect('/addPlanCategories')
+    };
+
   }else{
     res.redirect('/account')
   }
@@ -295,7 +292,7 @@ router.get('/addPlanCategories', ensureLoggedIn, async function (req,res){
   const role = req.session.role;
   res.render('addCategories', 
    {title : 'Add Categories',
-    categories: await db.getCategories(username, role)
+    categories: await db.getLatestCategoriesName(username, role)
   }) 
 });
 
@@ -314,12 +311,73 @@ router.post('/addPlanCategories', ensureLoggedIn, async function(req, res){
     res.redirect('/addPlanCategories')
   }
   else if (req.body.addCategory){
+    if(isInvalid(CategoryName)){
+      throw new Error("Invalid submission!");
+    }else{
     await db.addCategory(username, role, Budgeted, Spent, CategoryName);
     res.redirect('/addPlanCategories');
-  }else{
+  }
+}
+  else{
     res.redirect('/account')
   }
 });
+
+router.get('/editplan', ensureLoggedIn, async function(req, res) {;
+  const username = req.session.username;
+  const role = req.session.role;
+  var planName = await db.getPlanName();
+  var plans = await db.getPlans(username, role)
+  var planID = await db.getId(username, plans, planName);
+  var plan = await db.getPlanDetails(planID);
+  var categories = await db.getCategories(planID);
+  res.render('EditPlan', 
+   {title : 'Edit Plan',
+      name: plan.PlanName, 
+      start: plan.StartDate, 
+      end: plan.EndDate, 
+      total: plan.totalSpent, 
+      category: categories,
+      category_name : categories.map(({name}) => name)
+    });  
+  });
+
+router.post('/editplan', ensureLoggedIn, async function(req, res) {
+  var{
+    new_plan_name,
+    new_start_date,
+    new_end_date,
+    Budgeted, 
+    Spent, 
+    CategoryName,
+    new_cat_name,
+    new_budget,
+    new_spent
+} = req.body;
+const username = req.session.username;
+const role = req.session.role;
+  if (req.body.deleteCategory) {
+    await db.deleteEditCategory(username, role, req.body.deleteCategory)
+    res.redirect('/editplan');
+  }
+  else if (req.body.editCategory) {
+    await db.editCategory(username, role, req.body.editCategory, new_cat_name, new_budget, new_spent)
+    res.redirect('/editplan');
+  }  
+  else if (req.body.addCategory){
+    if(isInvalid(CategoryName)){
+      throw new Error("Invalid submission!");
+    }else{
+    await db.addCategory(username, role, Budgeted, Spent, CategoryName);
+    res.redirect('/editplan');};
+    }
+  else {
+    await db.editPlan(username, role, new_plan_name, new_start_date, new_end_date);
+    await db.clearPlanName();
+    res.redirect('/plans')
+  }
+});
+
 
 router.get('/account', ensureLoggedIn, async function(req, res){
   const username = req.session.username;
