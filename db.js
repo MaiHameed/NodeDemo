@@ -1,6 +1,7 @@
 var { MongoClient, Logger } = require("mongodb");
 var bcrypt = require("bcrypt"); //for password auth
 var url = "mongodb+srv://dbUser:dbPassword@cluster0.rdapr.mongodb.net/cps888?retryWrites=true&w=majority";
+var plan_name_edit = "";
 
 if (process.env.TEST) {
     url = "mongodb+srv://dbUser:dbPassword@cluster0.rdapr.mongodb.net/cps888-test?retryWrites=true&w=majority";
@@ -71,7 +72,7 @@ async function login(username, password) {
     var advisor = await conn.collection('advisors').findOne({ username });
 
     if (user == null && advisor == null) {
-        throw new Error('Profile does not exsist!');
+        throw new Error('Account does not exsist!');
     }else if(user == null){
         var valid = await bcrypt.compare(password, advisor.passwordHash);
         var role = 'advisor';
@@ -112,7 +113,7 @@ async function getName(username){
     }
 }
 
-async function deleteProfile(username){
+async function deleteAccount(username){
     var conn = await connect();
     await conn.collection('users').deleteOne({ username: username });
     await conn.collection('advisors').deleteOne({ username: username });
@@ -441,7 +442,7 @@ async function addPlan (username, role, PlanName, StartDate, EndDate){
     }
 }
 
-async function getPlan(username, role){
+async function getLatestPlan(username, role){
     var conn = await connect();
     if (role =='user'){
         var user = await conn.collection('users').findOne({ username });
@@ -463,7 +464,7 @@ async function getPlan(username, role){
 
 async function addCategory (username, role, Budgeted, Spent, CategoryName){
     var conn = await connect();
-    var _id = await getPlan(username, role);
+    var _id = await getLatestPlan(username, role);
     var ObjectId = require('mongodb').ObjectId;
     var id_obj = ObjectId(_id);
     var plan = await conn.collection('plans').findOne({_id:ObjectId(_id)})
@@ -485,30 +486,18 @@ async function addCategory (username, role, Budgeted, Spent, CategoryName){
         )
 }
 
-async function getCategories(username, role){
+async function getLatestCategoriesName(username, role){
     var conn = await connect();
-    var _id = await getPlan(username, role);
+    var _id = await getLatestPlan(username, role);
     var ObjectId = require('mongodb').ObjectId;
     var id_obj = ObjectId(_id);
     var plan = await conn.collection('plans').findOne({_id:ObjectId(id_obj)})  
     var category_list = plan.categories;
     console.log(category_list);
-    return category_list.map(({name}) => name);
+    return category_list;
+    //return category_list.map(({name}) => name);
 }
 
-async function deleteListItems(username, item){
-    var conn = await connect();
-
-    await conn.collection('users').updateOne(
-        
-        {username},
-        {
-            $pull: {
-                list: item,
-            }
-        }
-    )
-}
 async function deleteCategory(username, role, categoryname){
     var conn = await connect();
     var _id = await getPlan(username, role);
@@ -551,6 +540,157 @@ async function deleteCategory(username, role, categoryname){
         )
 }
 
+async function savePlanName(PlanName){
+    plan_name_edit = PlanName;
+    console.log("saveplanname" + PlanName)
+}
+
+async function getPlanName(){
+    console.log("getplaname:"+ plan_name_edit)
+    return plan_name_edit;
+}
+
+async function clearPlanName(){
+    plan_name_edit = "";
+}
+async function getCategories(PlanId){
+    var conn = await connect();
+    var ObjectId = require('mongodb').ObjectId;
+    console.log("plan id: ", PlanId)
+    var id_obj = ObjectId(PlanId);
+    var plan = await conn.collection('plans').findOne({_id:ObjectId(id_obj)})
+    console.log("getcategoriesplan" + plan)  
+    var category_list = plan.categories;
+    console.log("categories")
+    console.log(category_list);
+    return category_list;
+}
+
+async function editPlan (username, role, new_plan_name, new_start_date, new_end_date){
+    var conn = await connect();
+    var planName = await getPlanName();
+    var plans = await getPlans(username, role)
+    var planID = await getId(username, plans, planName);
+    console.log(planID)
+    var ObjectId = require('mongodb').ObjectId;
+    var id_obj = ObjectId(planID);
+    var plan = await conn.collection('plans').findOne({_id:ObjectId(id_obj)})
+
+    if (new_plan_name == null || new_plan_name==""){
+        new_plan_name = plan.PlanName
+    }
+    if (new_start_date == null|| new_start_date==""){
+        new_start_date = plan.StartDate
+    }
+    if (new_end_date == null|| new_end_date==""){
+        new_end_date = plan.EndDate
+    }
+    
+    await conn.collection('plans').update(
+        {_id: id_obj}, 
+            {$set:{
+                PlanName: new_plan_name,
+                StartDate: new_start_date,
+                EndDate: new_end_date
+                }
+            }
+        )
+}
+
+async function deleteEditCategory(username, role, categoryname){
+    var conn = await connect();
+    var planName = await getPlanName();
+    var plans = await getPlans(username, role)
+    var planID = await getId(username, plans, planName);
+    var ObjectId = require('mongodb').ObjectId;
+    var id_obj = ObjectId(planID);
+    var plan = await conn.collection('plans').findOne({_id:ObjectId(id_obj)})  
+    var category_list = plan.categories;
+    var category_name = category_list.map(({name}) => name);
+    var category_spent = category_list.map(({spent}) => spent);
+    console.log("NAME" +category_name);
+    console.log(categoryname);
+
+
+    var i = category_name.indexOf(categoryname)
+    console.log(i)
+    sub_spent = category_spent[i]
+    console.log(sub_spent)
+
+        if (i > -1) {
+                category_list.splice(i,1)
+            }
+        console.log(category_list);
+
+        const filter = { _id: id_obj };
+        const updateDocument = {
+            $set: {
+                categories: category_list
+                },
+            }
+
+    result = await conn.collection('plans').updateOne(filter, updateDocument);
+    
+    var total_spent = +parseFloat(plan.totalSpent) + -parseFloat(sub_spent);
+    await conn.collection('plans').update(
+        {_id: id_obj}, 
+            {$set:{
+                totalSpent: total_spent,
+                }
+            }
+        )
+}
+
+
+async function editCategory (username, role, categoryname, new_cat_name, new_budget, new_spent){
+    var conn = await connect();
+    var planName = await getPlanName();
+    var plans = await getPlans(username, role)
+    var planID = await getId(username, plans, planName);
+    var ObjectId = require('mongodb').ObjectId;
+    var id_obj = ObjectId(planID);
+    var plan = await conn.collection('plans').findOne({_id:ObjectId(id_obj)})  
+    var category_list = plan.categories;
+    var category_name = category_list.map(({name}) => name);
+    var category_spent = category_list.map(({spent}) => spent);
+    var category_budget = category_list.map(({budgeted}) => budgeted);
+
+
+    var i = category_name.indexOf(categoryname)
+    sub_spent = category_spent[i]
+
+    if (new_cat_name[i] == null || new_cat_name[i]==""){
+        new_cat_name[i] = category_name[i]
+    }
+    if (new_budget[i] == null|| new_budget[i]==""){
+        new_budget[i] = category_budget[i]
+    }
+    if (new_spent[i] == null|| new_spent[i]==""){
+        new_spent[i] = category_spent[i]
+    }
+
+    category_list[i] = {budgeted: new_budget[i], spent: new_spent[i], name: new_cat_name[i]}
+
+        const filter = { _id: id_obj };
+        const updateDocument = {
+            $set: {
+                categories: category_list
+                },
+            }
+
+    result = await conn.collection('plans').updateOne(filter, updateDocument);
+    
+    var total_spent = +parseFloat(plan.totalSpent) + -parseFloat(sub_spent) + parseFloat(new_spent[i]);
+    await conn.collection('plans').update(
+        {_id: id_obj}, 
+            {$set:{
+                totalSpent: total_spent,
+                }
+            }
+        )
+       
+}
+
 async function close(){
     await client.close();
 }
@@ -569,15 +709,23 @@ module.exports = {
     acceptPlan,
     sendPlan,
     getFunds,
-    deleteProfile,
+    deleteAccount,
     getName,
     addFunds,
     removeFunds,
     addPlan,
-    getPlan,
+    getLatestPlan,
     addCategory,
+    getLatestCategoriesName,
+    deleteCategory,
+    savePlanName,
+    getPlanName,
+    clearPlanName,
     getCategories,
     deleteCategory,
+    editPlan,
+    editCategory,
+    deleteEditCategory,
     close
 };
 
@@ -591,4 +739,3 @@ if (process.env.TEST) {
     module.exports.wipe = wipe;
 }
    
-

@@ -9,7 +9,9 @@
     <ul> 
         {{#each categories}}
         <li>
-        <div class="item-text"> {{this}} </div>
+        <div class="item-text"> {{this.name}} </div>
+        <div class="item-text"> {{this.budgeted}} </div>
+        <div class="item-text"> {{this.spent}} </div>
         <button type = "submit" name = "deleteCategory" value = "{{this}}">
             Delete            
         </button>

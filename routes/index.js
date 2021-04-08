@@ -4,6 +4,7 @@ const { Logger } = require('mongodb');
 const { response } = require('../app');
 var router = express.Router();
 var db = require("../db")
+var plan_name_edit = "";
 
 // User login page
 router.get('/login', async function(req, res) { // renders a given hbs for given endpoint
@@ -21,6 +22,9 @@ router.post('/login', async function(req, res) {
   if(register){
     res.redirect('/register');
   }else if(login){
+    if(isInvalid(username) || isInvalid(password)){
+      throw new Error("Invalid submission!");
+    }
     var role = await db.login(username, password);
     req.session.username = username;
     req.session.role = role;
@@ -28,17 +32,30 @@ router.post('/login', async function(req, res) {
   }
 });
 
+// Helper function to check if string is null/undefined/empty
+function isInvalid(str){
+  return(!str || 
+    str.length === 0 ||
+    str === '' ||
+    str === 'undefined' ||
+    /^\s*$/.test(str));
+}
+
 router.post('/register', async function(req, res) {
   var { name,
         username, 
         password, 
         role } = req.body; // these values coming from login.hbs file
 
-  await db.register(name, username, password, role);
-  req.session.username = username;
-  req.session.role = role;
-  console.log(role);
-  res.redirect('/');
+  if (isInvalid(name) || isInvalid(username) || isInvalid(password)){
+    throw new Error("Invalid submission!");
+  }else{
+    await db.register(name, username, password, role);
+    req.session.username = username;
+    req.session.role = role;
+    console.log(role);
+    res.redirect('/');
+  }
 });
 
 router.get('/register', async function(req,res){
@@ -83,8 +100,8 @@ router.get('/logout', ensureLoggedIn, async function(req, res) {
   res.status(200).end();
 });
 
-router.delete('/deleteProfile/:username', ensureLoggedIn, async function(req, res) {
-  const response = await db.deleteProfile(req.params.username);
+router.delete('/deleteAccount/:username', ensureLoggedIn, async function(req, res) {
+  const response = await db.deleteAccount(req.params.username);
   if(!response){
     res.status(200).end();
   } else{
@@ -141,20 +158,10 @@ router.post('/plans', ensureLoggedIn, async function(req, res) {
     });
   
   } else if (req.body.edit) {
-    console.log("EDIT")
-    var planName = req.body.edit
-    var plans = await db.getPlans(username, req.session.role)
-    var planID = db.getId(username, plans, planName)
-    var plan = await db.getPlanDetails(planID)
-    
-    res.render('budget', {
-      name: plan.PlanName, 
-      start: plan.StartDate, 
-      end: plan.EndDate, 
-      total: plan.totalSpent, 
-      categories: plan.categories, 
-      isUser: isUser
-    });
+      console.log("EDIT")
+    var planName = req.body.edit;
+    await db.savePlanName(planName);
+    res.redirect('/editplan')
 
   } else if (req.body.home) {
     res.redirect('/account')
@@ -270,7 +277,13 @@ router.post('/addPlan', ensureLoggedIn, async function(req, res){
   console.log(username);
   if (req.body.submitPlan){
     await db.addPlan(username, role, PlanName, StartDate, EndDate);
-    res.redirect('/addPlanCategories');
+    
+    if(isInvalid(PlanName)){
+      throw new Error("Invalid submission!");
+    }else{
+    res.redirect('/addPlanCategories')
+    };
+
   }else{
     res.redirect('/account')
   }
@@ -281,7 +294,7 @@ router.get('/addPlanCategories', ensureLoggedIn, async function (req,res){
   const role = req.session.role;
   res.render('addCategories', 
    {title : 'Add Categories',
-    categories: await db.getCategories(username, role)
+    categories: await db.getLatestCategoriesName(username, role)
   }) 
 });
 
@@ -300,12 +313,73 @@ router.post('/addPlanCategories', ensureLoggedIn, async function(req, res){
     res.redirect('/addPlanCategories')
   }
   else if (req.body.addCategory){
+    if(isInvalid(CategoryName)){
+      throw new Error("Invalid submission!");
+    }else{
     await db.addCategory(username, role, Budgeted, Spent, CategoryName);
     res.redirect('/addPlanCategories');
-  }else{
+  }
+}
+  else{
     res.redirect('/account')
   }
 });
+
+router.get('/editplan', ensureLoggedIn, async function(req, res) {;
+  const username = req.session.username;
+  const role = req.session.role;
+  var planName = await db.getPlanName();
+  var plans = await db.getPlans(username, role)
+  var planID = await db.getId(username, plans, planName);
+  var plan = await db.getPlanDetails(planID);
+  var categories = await db.getCategories(planID);
+  res.render('EditPlan', 
+   {title : 'Edit Plan',
+      name: plan.PlanName, 
+      start: plan.StartDate, 
+      end: plan.EndDate, 
+      total: plan.totalSpent, 
+      category: categories,
+      category_name : categories.map(({name}) => name)
+    });  
+  });
+
+router.post('/editplan', ensureLoggedIn, async function(req, res) {
+  var{
+    new_plan_name,
+    new_start_date,
+    new_end_date,
+    Budgeted, 
+    Spent, 
+    CategoryName,
+    new_cat_name,
+    new_budget,
+    new_spent
+} = req.body;
+const username = req.session.username;
+const role = req.session.role;
+  if (req.body.deleteCategory) {
+    await db.deleteEditCategory(username, role, req.body.deleteCategory)
+    res.redirect('/editplan');
+  }
+  else if (req.body.editCategory) {
+    await db.editCategory(username, role, req.body.editCategory, new_cat_name, new_budget, new_spent)
+    res.redirect('/editplan');
+  }  
+  else if (req.body.addCategory){
+    if(isInvalid(CategoryName)){
+      throw new Error("Invalid submission!");
+    }else{
+    await db.addCategory(username, role, Budgeted, Spent, CategoryName);
+    res.redirect('/editplan');};
+    }
+  else {
+    await db.editPlan(username, role, new_plan_name, new_start_date, new_end_date);
+    await db.clearPlanName();
+    res.redirect('/plans')
+  }
+});
+
 
 router.get('/account', ensureLoggedIn, async function(req, res){
   const username = req.session.username;
