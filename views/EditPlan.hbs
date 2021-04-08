@@ -18,9 +18,9 @@
                 <li> {{! List item }}
                     <h4>Name:</h4> <div class="item-text"> {{this.name}} </div>
                     <input name = "new_cat_name" placeholder="New Category Name">
-                    <h4>Budgeted:</h4><div class="item-text"> {{this.budgeted}} </div>
+                    <h4>Budgeted:</h4><div class="item-text"> ${{this.budgeted}} </div>
                     <input name = "new_budget" placeholder="New Budget" type = "number" step = "any">
-                   <h4>Spent:</h4><div class="item-text"> {{this.spent}} </div>
+                   <h4>Spent:</h4><div class="item-text"> ${{this.spent}} </div>
                     <input name = "new_spent" placeholder="New Spent" type = "number" step = "any">
                     <button type = "submit" name = "editCategory" value = "{{this.name}}">
                         Update            
