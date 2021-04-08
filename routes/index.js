@@ -18,13 +18,12 @@ router.post('/login', async function(req, res) {
     register
   } = req.body;
 
-  if(isInvalid(username) || isInvalid(password)){
-    throw new Error("Invalid submission!");
-  }
-
   if(register){
     res.redirect('/register');
   }else if(login){
+    if(isInvalid(username) || isInvalid(password)){
+      throw new Error("Invalid submission!");
+    }
     var role = await db.login(username, password);
     req.session.username = username;
     req.session.role = role;
