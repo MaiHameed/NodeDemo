@@ -49,10 +49,6 @@ test('Add category', async function(){
     await db.addCategory('testUser', 'user', 100, 50)
 });
 
-test('Get categories', async function(){
-    var categories = await db.getCategories('testUser', 'user')
-});
-
 test('Send plan', async function(){
     var plans = await db.getPlans('testAdv', 'advisor')
     var planId = await db.getId('testAdv', plans, 'testPlan')
@@ -60,11 +56,11 @@ test('Send plan', async function(){
 });
 
 test('Delete Profile - User', async function(){
-    await db.deleteProfile('testUser')
+    await db.deleteAccount('testUser')
 });
 
 test('Delete Profile - Advisor', async function(){
-    await db.deleteProfile('testAdv')
+    await db.deleteAccount('testAdv')
 });
 
 afterAll(async function(){
