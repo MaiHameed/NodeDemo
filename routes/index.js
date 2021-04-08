@@ -141,9 +141,20 @@ router.post('/plans', ensureLoggedIn, async function(req, res) {
     });
   
   } else if (req.body.edit) {
-    // ola
     console.log("EDIT")
     var planName = req.body.edit
+    var plans = await db.getPlans(username, req.session.role)
+    var planID = db.getId(username, plans, planName)
+    var plan = await db.getPlanDetails(planID)
+    
+    res.render('budget', {
+      name: plan.PlanName, 
+      start: plan.StartDate, 
+      end: plan.EndDate, 
+      total: plan.totalSpent, 
+      categories: plan.categories, 
+      isUser: isUser
+    });
 
   } else if (req.body.home) {
     res.redirect('/account')
@@ -244,6 +255,58 @@ router.post('/pendingPlans', ensureLoggedIn, async function(req, res) {
 });
 
 
+router.get('/addPlan', ensureLoggedIn, async function (req,res){
+  res.render('addPlan', {title : 'Add Plan'}) 
+});
+
+router.post('/addPlan', ensureLoggedIn, async function(req, res){
+  var{
+      PlanName,
+      StartDate,
+      EndDate,
+  } = req.body;
+  const username = req.session.username;
+  const role = req.session.role;
+  console.log(username);
+  if (req.body.submitPlan){
+    await db.addPlan(username, role, PlanName, StartDate, EndDate);
+    res.redirect('/addPlanCategories');
+  }else{
+    res.redirect('/account')
+  }
+});
+
+router.get('/addPlanCategories', ensureLoggedIn, async function (req,res){
+  const username = req.session.username;
+  const role = req.session.role;
+  res.render('addCategories', 
+   {title : 'Add Categories',
+    categories: await db.getCategories(username, role)
+  }) 
+});
+
+router.post('/addPlanCategories', ensureLoggedIn, async function(req, res){
+  var{
+      Budgeted,
+      Spent,
+      CategoryName,
+  } = req.body;
+  const username = req.session.username;
+  const role = req.session.role;
+  console.log(username);
+  
+  if (req.body.deleteCategory){
+    await db.deleteCategory(username, role, req.body.deleteCategory)
+    res.redirect('/addPlanCategories')
+  }
+  else if (req.body.addCategory){
+    await db.addCategory(username, role, Budgeted, Spent, CategoryName);
+    res.redirect('/addPlanCategories');
+  }else{
+    res.redirect('/account')
+  }
+});
+
 router.get('/account', ensureLoggedIn, async function(req, res){
   const username = req.session.username;
   const role = req.session.role;
@@ -294,7 +357,7 @@ router.post('/account', ensureLoggedIn, async function(req, res){
       } else {
         console.log("invalid remove amount entered.");
       }
-  }
+  } 
 });
 
 module.exports = router;

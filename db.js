@@ -125,6 +125,8 @@ async function getPlans(username, role) { // Returns all plans associated with a
 
     if (role == 'user') {
         var user = await conn.collection('users').findOne({ username });
+        console.log(user)
+
         var planIds = user.financialProfile.plans;
         
         var plans = await Promise.all(planIds.map(async function(id){
@@ -320,24 +322,6 @@ async function sendPlan(username, planID) { // Adds plan ID to users pending pla
     const result = await conn.collection('users').updateOne(filter, updateDocument);
 }
 
-// async function addFunds(username, amount){
-//     var conn = await connect();
-
-//     var existingFunds = await getFunds(username);
-//     console.log(existingFunds);
-//     // console.log("input amount: "+ amount)
-//     newAmount = +existingFunds + +amount;
-//     // console.log("new funds"+ newAmount);
-//     await conn.collection('users').updateOne(
-//         {username},
-//         {
-//             $set:{
-//                 "financialProfile.totalFunds": newAmount,
-//             }
-//         }
-//     )
-//     console.log(await getFunds(username))
-// }
 
 async function addFunds(username, amount){
     var conn = await connect();
@@ -398,6 +382,175 @@ async function removeFunds(username, amount){
     console.log(await getFunds(username));    
 }
 
+async function addPlan (username, role, PlanName, StartDate, EndDate){
+    var conn = await connect();
+    var plan;
+    if (role == 'user') {
+        var user = await conn.collection('users').findOne({ username });
+        var plan = await conn.collection('plans').insertOne(
+                { 
+                    PlanName,
+                    StartDate, 
+                    EndDate,
+                    totalSpent: 0,
+                    categories: []
+                    
+                } 
+        )
+        var new_id = plan.insertedId;
+        var planIds = user.financialProfile.plans;
+        planIds.push(new_id.toString())
+
+        filter = { _id: user._id };
+        updateDocument = {
+            $set: {
+                financialProfile: {
+                    plans: planIds, 
+                    pendingPlans: user.financialProfile.pendingPlans,
+                    totalFunds: user.financialProfile.totalFunds,
+                },
+            },
+        };
+        result = await conn.collection('users').updateOne(filter, updateDocument);
+    }
+
+    else{
+        var advisor = await conn.collection('advisors').findOne({ username });
+        var plan = await conn.collection('plans').insertOne(
+                { 
+                    PlanName,
+                    StartDate, 
+                    EndDate,
+                    totalSpent: 0,
+                    categories: []
+                    
+                } 
+        )
+        new_id = plan.insertedId
+        planIds = advisor.plans;
+        planIds.push(new_id.toString())
+
+        filter = { _id: advisor._id };
+        updateDocument = {
+            $set: {
+                plans: planIds, 
+            },
+        };
+        
+        result = await conn.collection('advisors').updateOne(filter, updateDocument);
+    }
+}
+
+async function getPlan(username, role){
+    var conn = await connect();
+    if (role =='user'){
+        var user = await conn.collection('users').findOne({ username });
+        var planIds = user.financialProfile.plans;   
+        l = planIds.length
+        index = l-1
+        var _id = ""+planIds[index];
+        return _id;
+    }
+    else{
+        var advisor = await conn.collection('advisors').findOne({ username });
+        var planIds = advisor.plans;    
+            l = planIds.length
+            index = l-1
+            var _id = ""+planIds[index];
+            return _id;
+    }
+}
+
+async function addCategory (username, role, Budgeted, Spent, CategoryName){
+    var conn = await connect();
+    var _id = await getPlan(username, role);
+    var ObjectId = require('mongodb').ObjectId;
+    var id_obj = ObjectId(_id);
+    var plan = await conn.collection('plans').findOne({_id:ObjectId(_id)})
+    console.log(plan)
+    await conn.collection('plans').update(
+        {_id: id_obj}, 
+            {$addToSet: {
+                categories: {budgeted: Budgeted, spent: Spent, name: CategoryName}
+            }
+        }
+    )
+    var total_spent = +parseFloat(plan.totalSpent) + parseFloat(Spent);
+    await conn.collection('plans').update(
+        {_id: id_obj}, 
+            {$set:{
+                totalSpent: total_spent,
+                }
+            }
+        )
+}
+
+async function getCategories(username, role){
+    var conn = await connect();
+    var _id = await getPlan(username, role);
+    var ObjectId = require('mongodb').ObjectId;
+    var id_obj = ObjectId(_id);
+    var plan = await conn.collection('plans').findOne({_id:ObjectId(id_obj)})  
+    var category_list = plan.categories;
+    console.log(category_list);
+    return category_list.map(({name}) => name);
+}
+
+async function deleteListItems(username, item){
+    var conn = await connect();
+
+    await conn.collection('users').updateOne(
+        
+        {username},
+        {
+            $pull: {
+                list: item,
+            }
+        }
+    )
+}
+async function deleteCategory(username, role, categoryname){
+    var conn = await connect();
+    var _id = await getPlan(username, role);
+    var ObjectId = require('mongodb').ObjectId;
+    var id_obj = ObjectId(_id);
+    var plan = await conn.collection('plans').findOne({_id:ObjectId(id_obj)})  
+    var category_list = plan.categories;
+    var category_name = category_list.map(({name}) => name);
+    var category_spent = category_list.map(({spent}) => spent);
+    console.log("NAME" +category_name);
+    console.log(categoryname);
+
+
+    var i = category_name.indexOf(categoryname)
+    console.log(i)
+    sub_spent = category_spent[i]
+    console.log(sub_spent)
+
+    if (i > -1) {
+            category_list.splice(i,1)
+        }
+    console.log(category_list);
+
+        const filter = { _id: id_obj };
+        const updateDocument = {
+            $set: {
+                categories: category_list
+                },
+            }
+
+    result = await conn.collection('plans').updateOne(filter, updateDocument);
+    
+    var total_spent = +parseFloat(plan.totalSpent) + -parseFloat(sub_spent);
+    await conn.collection('plans').update(
+        {_id: id_obj}, 
+            {$set:{
+                totalSpent: total_spent,
+                }
+            }
+        )
+}
+
 async function close(){
     await client.close();
 }
@@ -420,6 +573,11 @@ module.exports = {
     getName,
     addFunds,
     removeFunds,
+    addPlan,
+    getPlan,
+    addCategory,
+    getCategories,
+    deleteCategory,
     close
 };
 
@@ -432,3 +590,5 @@ async function wipe() {
 if (process.env.TEST) {
     module.exports.wipe = wipe;
 }
+   
+

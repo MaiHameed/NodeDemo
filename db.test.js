@@ -37,6 +37,28 @@ test('Get name - advisor', async function(){
     expect(name).toBe('testName')
 });
 
+test('Add plan - user', async function(){
+    await db.addPlan('testUser', 'user', "testPlan", "2020-01-01", "2021-01-01")
+});
+
+test('Add plan - advisor', async function(){
+    await db.addPlan('testAdv', 'advisor', "testPlan", "2020-01-01", "2021-01-01")
+});
+
+test('Add category', async function(){
+    await db.addCategory('testUser', 'user', 100, 50)
+});
+
+test('Get categories', async function(){
+    var categories = await db.getCategories('testUser', 'user')
+});
+
+test('Send plan', async function(){
+    var plans = await db.getPlans('testAdv', 'advisor')
+    var planId = await db.getId('testAdv', plans, 'testPlan')
+    db.sendPlan('testUser', planId)
+});
+
 test('Delete Profile - User', async function(){
     await db.deleteProfile('testUser')
 });
