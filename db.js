@@ -116,6 +116,7 @@ async function getPlans(username, role) { // Returns all plans associated with a
     if (role == 'user') {
         var user = await conn.collection('users').findOne({ username });
         console.log(user)
+
         var planIds = user.financialProfile.plans;
         
         var plans = await Promise.all(planIds.map(async function(id){
@@ -389,6 +390,7 @@ async function removeFunds(username, amount){
     }
     console.log(await getFunds(username));    
 }
+
 
 
 async function addPlan (username, role, PlanName, StartDate, EndDate){

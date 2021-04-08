@@ -251,6 +251,7 @@ router.post('/pendingPlans', ensureLoggedIn, async function(req, res) {
   } 
 });
 
+
 router.get('/addPlan', ensureLoggedIn, async function (req,res){
   res.render('addPlan', {title : 'Add Plan'}) 
 });
