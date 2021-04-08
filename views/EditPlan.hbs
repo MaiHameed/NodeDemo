@@ -4,18 +4,39 @@
 <title>Page Title</title>
 </head>
 <body>
-    <h1>Your Budgets</h1>
+    <h1>Edit Budget</h1>
 
     <form method="post">
-        <ul> {{! Unordered list }}
-            {{#each items}}
+        <div class="item-text"> <h3>Plan Name: {{name}}</h3><input name = "new_plan_name" placeholder="New Plan Name"></div> 
+         <div class="item-text"> <h3>Start Date: {{start}}</h3> 
+         <input name = "new_start_date" placeholder="New Start Date" type="date"></div> 
+        <div class="item-text"> <h3>End Date: {{end}}</h3> 
+        <input name = "new_end_date" placeholder="New End Date" type="date"></div>
+        <div class="item-text"> <h3>Total Spent: {{total}}</h3></div>
+        <br>
+        {{#each category}}
                 <li> {{! List item }}
-                    <div class="item-text"> {{this}} </div>
-                </li> 
-            {{/each}}
-        </ul>
-        <button type="return" name="home" value="{{this}}">
-            Return to Account Options
+                    <h3>Name:</h3> <div class="item-text"> {{this.name}} </div>
+                    <input name = "new_cat_name" placeholder="New Category Name">
+                    <h4>Budgeted:</h4><div class="item-text"> {{this.budgeted}} </div>
+                    <input name = "new_budget" placeholder="New Budget" type = "number" step = "any">
+                   <h4>Spent:</h4><div class="item-text"> {{this.spent}} </div>
+                    <input name = "new_spent" placeholder="New Spent" type = "number" step = "any">
+                    <button type = "submit" name = "editCategory" value = "{{this.name}}">
+                        Edit            
+                    </button>
+                    <button type = "submit" name = "deleteCategory" value = "{{this.name}}">
+                        Delete            
+                    </button>
+                </li>
+        {{/each}}
+        <input name = "CategoryName" placeholder="Category Name">
+        <input name = "Budgeted" placeholder="Amount Budgeted" type="number" step = "any">
+        <input name = "Spent" placeholder="Amount Spent"  type="number" step = "any">
+        <input name = "addCategory"type= "submit" value = "Add Category">
+        <br>
+        <button type="submit" name="saveChanges">
+            Save Changes
         </button>
     </form>
 </body>
